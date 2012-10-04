@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Script to install Nominatim on Ubuntu
-# Tested on 12.04 (View Ubuntu version using 'lsb_release -a') 
+# Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 
 
 ### SETTINGS ###
 
-# Define the username for Nominatim to run under, so that it can run independent of any individual personal account on the machine
+# Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
 username=nominatim
 
 # Define the location of the .pdf OSM data file
@@ -18,10 +18,6 @@ osmdatafilename=great_britain.osm.pbf
 websiteurl=nominatim.cyclestreets.net
 emailcontact=webmaster@cyclestreets.net
 
-
-
-
-if [ true = false ] ; then
 
 
 ### MAIN PROGRAM ###
@@ -112,8 +108,6 @@ sudo mkdir -m 755 /var/www/nominatim
 sudo chown ${username} /var/www/nominatim
 sudo -u ${username} ./utils/setup.php --create-website /var/www/nominatim
 
-
-
 # Create a VirtalHost for Apache
 cat > /etc/apache2/sites-available/nominatim << EOF
 <VirtualHost *:80>
@@ -133,16 +127,14 @@ cat > /etc/apache2/sites-available/nominatim << EOF
 </VirtualHost>
 EOF
 
-# Add the website configuration
+# Add local Nominatim settings
 cat > /home/nominatim/Nominatim/settings/local.php << EOF
 <?php
    // Paths
    @define('CONST_Postgresql_Version', '9.1');
    // Website settings
-   @define('CONST_Website_BaseURL', 'http://nominatim.cyclestreets.net/');
+   @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
-
-fi
 
 # Enable the VirtualHost and restart Apache
 a2ensite nominatim
