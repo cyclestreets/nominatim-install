@@ -1,4 +1,8 @@
 #!/bin/sh
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>log.out 2>&1
+# Everything below will go to the file 'log.out':
 
 # Script to install Nominatim on Ubuntu
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
@@ -98,10 +102,10 @@ sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/$os
 # Add special phrases
 sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql
 sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql
-sudo -u ${username} rm specialphrases_countries.sql
+rm specialphrases_countries.sql
 sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql
 sudo -u ${username} psql -d nominatim -f specialphrases.sql
-sudo -u ${username} rm specialphrases.sql
+rm specialphrases.sql
 
 # Set up the website for use with Apache
 sudo mkdir -m 755 /var/www/nominatim
