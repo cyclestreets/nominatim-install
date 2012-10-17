@@ -12,7 +12,7 @@
 echo "#\tNominatim installation"
 
 ### CREDENTIALS ###
-# Location of credentials file
+# Name of the credentials file
 configFile=.config.sh
 
 # Generate your own credentials file by copying from .config.sh.template
@@ -24,24 +24,12 @@ fi
 # Load the credentials
 . ./${configFile}
 
-### SETTINGS ###
-
-# Define the location of the .pdf OSM data file
-# A couple of option groups here, comment in / out as necessary
-# British Isles
-osmdatafolder=europe/
-osmdatafilename=british_isles.osm.pbf
-# Europe
-osmdatafolder=
-osmdatafilename=europe.osm.pbf
-
 # Download url
 osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatafilename}
 
-echo "#\t${username}"
-echo "#\t${password}"
-echo "#\t${osmdataurl}"
-echo "#\t${emailcontact}"
+# Trace output
+#echo "#\t${osmdataurl}"
+#echo "#\t${emailcontact}"
 
 ### MAIN PROGRAM ###
 
@@ -75,7 +63,7 @@ exit
 
 # Create the Nominatim user
 useradd -m -p $password $username
-echo "Nominatim user ${username} created"
+echo "#\tNominatim user ${username} created"
 
 # Install basic software
 apt-get -y install wget git
@@ -105,8 +93,9 @@ cd Nominatim
 make
 
 # Get Wikipedia data which helps with name importance hinting
-wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+# !! These steps take a while and are not necessary during testing of this script
+#wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+#wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
 # Creating the importer account in Postgres
 sudo -u postgres createuser -s $username

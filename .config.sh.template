@@ -9,3 +9,22 @@ emailcontact=nominatim@localhost
 # Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
 username=nominatim
 password=
+
+
+### SETTINGS ###
+
+# Define the location of the .pdf OSM data file
+# Several option groups here, comment in / out as necessary
+# Andorra
+osmdatafolder=europe/
+osmdatafilename=andorra.osm.pbf
+## British Isles
+#osmdatafolder=europe/
+#osmdatafilename=british_isles.osm.pbf
+## Iceland
+#osmdatafolder=europe/
+#osmdatafilename=iceland.osm.pbf
+## Europe
+#osmdatafolder=
+#osmdatafilename=europe.osm.pbf
+
