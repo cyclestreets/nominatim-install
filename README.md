@@ -6,7 +6,7 @@ http://wiki.openstreetmap.org/wiki/Nominatim/Installation
 
 After the repository has been cloned from github, proceed by making your own *.config.sh* file based on the *.config.sh.template* file.
 
-Running the installation script *nominatim-script.sh* (as *root*) will:
+Running the installation script *run.sh* (as *root*) will:
 
  * create a *nominatim* user
  * download all the necessary packages
