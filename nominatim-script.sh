@@ -79,7 +79,7 @@ eval cd ~${username}
 
 # Nominatim software
 sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git
-sudo -u ${username} cd Nominatim
+cd Nominatim
 sudo -u ${username} ./autogen.sh
 sudo -u ${username} ./configure --enable-64bit-ids
 sudo -u ${username} make
@@ -107,7 +107,7 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
 # Import and index main OSM data
-sudo -u ${username} cd /home/${username}/Nominatim/
+eval cd /home/${username}/Nominatim/
 sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all > setupLog.txt
 
 # Add special phrases
