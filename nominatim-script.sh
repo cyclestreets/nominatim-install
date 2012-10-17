@@ -27,17 +27,12 @@ fi
 # Download url
 osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatafilename}
 
-# Trace output
-#echo "#\t${osmdataurl}"
-#echo "#\t${emailcontact}"
-
 ### MAIN PROGRAM ###
 
 # Ensure this script is run as root
 if [ "$(id -u)" != "0" ]; then
 	echo "#\tThis script must be run as root" 1>&2
-# !! do not leave in !!
-#	exit 1
+	exit 1
 fi
 
 # Request a password for the Nominatim user account; see http://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing
@@ -57,9 +52,6 @@ if [ ! ${password} ]; then
 fi
 
 echo "#\tPassword: ${password}"
-# !! Development exit
-exit
-
 
 # Create the Nominatim user
 useradd -m -p $password $username
@@ -86,16 +78,16 @@ pear install DB
 eval cd ~${username}
 
 # Nominatim software
-git clone --recursive git://github.com/twain47/Nominatim.git
-cd Nominatim
-./autogen.sh
-./configure --enable-64bit-ids
-make
+sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git
+sudo -u ${username} cd Nominatim
+sudo -u ${username} ./autogen.sh
+sudo -u ${username} ./configure --enable-64bit-ids
+sudo -u ${username} make
 
 # Get Wikipedia data which helps with name importance hinting
 # !! These steps take a while and are not necessary during testing of this script
-#wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-#wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+#sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+#sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
 # Creating the importer account in Postgres
 sudo -u postgres createuser -s $username
@@ -109,22 +101,22 @@ chmod +x "/home/${username}/Nominatim"
 chmod +x "/home/${username}/Nominatim/module"
 
 # Ensure download folder exists
-mkdir -p data/${osmdatafolder}
+sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data
-wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
 # Import and index main OSM data
-cd /home/${username}/Nominatim/
-sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all
+sudo -u ${username} cd /home/${username}/Nominatim/
+sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all > setupLog.txt
 
 # Add special phrases
 sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql
 sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql
-rm specialphrases_countries.sql
+sudo -u ${username} rm specialphrases_countries.sql
 sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql
 sudo -u ${username} psql -d nominatim -f specialphrases.sql
-rm specialphrases.sql
+sudo -u ${username} rm specialphrases.sql
 
 # Set up the website for use with Apache
 sudo mkdir -m 755 /var/www/nominatim
