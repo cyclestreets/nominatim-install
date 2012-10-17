@@ -1,15 +1,15 @@
 #!/bin/sh
-# The following method of logging output came from: http://serverfault.com/questions/103501/how-can-i-fully-log-all-bash-scripts-actions
-#exec 3>&1 4>&2
-#trap 'exec 2>&4 1>&3' 0 1 2 3
-#exec 1>log.out 2>&1
-# Everything below will go to the file 'log.out':
-
 # Script to install Nominatim on Ubuntu
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 
-echo "#\tNominatim installation"
+echo "#\tNominatim installation $(date)"
+
+# Ensure this script is run as root
+if [ "$(id -u)" != "0" ]; then
+    echo "#\tThis script must be run as root." 1>&2
+    exit 1
+fi
 
 ### CREDENTIALS ###
 # Name of the credentials file
@@ -29,11 +29,12 @@ osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdataf
 
 ### MAIN PROGRAM ###
 
-# Ensure this script is run as root
-if [ "$(id -u)" != "0" ]; then
-	echo "#\tThis script must be run as root" 1>&2
-	exit 1
-fi
+# Logging
+# Use an absolute path for the log file to be tolerant of the changing working directory in this script
+setupLogFile=$(readlink -e $(dirname $0))/setupLog.txt
+touch ${setupLogFile}
+echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
+echo "#\tNominatim installation $(date)" >> ${setupLogFile}
 
 # Request a password for the Nominatim user account; see http://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing
 if [ ! ${password} ]; then
@@ -51,43 +52,41 @@ if [ ! ${password} ]; then
     fi
 fi
 
-echo "#\tPassword: ${password}"
-
 # Create the Nominatim user
 useradd -m -p $password $username
-echo "#\tNominatim user ${username} created"
+echo "#\tNominatim user ${username} created" >> ${setupLogFile}
 
 # Install basic software
-apt-get -y install wget git
+apt-get -y install wget git >> ${setupLogFile}
 
 # Install Apache, PHP
-apt-get -y install apache2 php5
+apt-get -y install apache2 php5 >> ${setupLogFile}
 
 # Install Postgres, PostGIS and dependencies
-apt-get -y install php5-pgsql postgis postgresql php5 php-pear gcc proj libgeos-c1 postgresql-contrib git osmosis
-apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1
-apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
+apt-get -y install php5-pgsql postgis postgresql php5 php-pear gcc proj libgeos-c1 postgresql-contrib git osmosis >> ${setupLogFile}
+apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
+apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev >> ${setupLogFile}
 
 # Add Protobuf support
-apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
+apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
 
 # PHP Pear::DB is needed for the runtime website
-pear install DB
+pear install DB >> ${setupLogFile}
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd ~${username}
 
 # Nominatim software
-sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git
+sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
 cd Nominatim
-sudo -u ${username} ./autogen.sh
-sudo -u ${username} ./configure --enable-64bit-ids
-sudo -u ${username} make
+sudo -u ${username} ./autogen.sh >> ${setupLogFile}
+sudo -u ${username} ./configure --enable-64bit-ids >> ${setupLogFile}
+sudo -u ${username} make >> ${setupLogFile}
 
 # Get Wikipedia data which helps with name importance hinting
 # !! These steps take a while and are not necessary during testing of this script
-#sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-#sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
 # Creating the importer account in Postgres
 sudo -u postgres createuser -s $username
@@ -106,23 +105,20 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 # Download OSM data
 sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
-# Logging
-setupLogFile=setupLog.txt
-touch ${setupLogFile}
-echo "#\tImport and index OSM data in progress, follow log file with: tail -f ${setupLogFile}"
-echo "#\tNominatim installation $(date)" >> ${setupLogFile}
-
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
 sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
+echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
 
 # Add special phrases
+echo "#\tStarting special phrases $(date)" >> ${setupLogFile}
 sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql >> ${setupLogFile}
 sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql >> ${setupLogFile}
 sudo -u ${username} rm -f specialphrases_countries.sql
 sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql >> ${setupLogFile}
 sudo -u ${username} psql -d nominatim -f specialphrases.sql >> ${setupLogFile}
 sudo -u ${username} rm -f specialphrases.sql
+echo "#\tDone special phrases $(date)" >> ${setupLogFile}
 
 # Set up the website for use with Apache
 sudo mkdir -m 755 /var/www/nominatim
@@ -161,3 +157,4 @@ EOF
 a2ensite nominatim
 service apache2 reload
 
+echo "#\tNominatim installation completed $(date)" >> ${setupLogFile}

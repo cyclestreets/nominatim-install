@@ -3,8 +3,13 @@
 # This is a template file, save as simply .config.sh and set your own values below.
 
 # Define the website hostname and e-mail for the VirtualHost
+# Several option groups here, comment in / out as necessary
+# Localhost
 websiteurl=nominatim.localhost
 emailcontact=nominatim@localhost
+# CycleStreets
+#websiteurl=nominatim.cyclestreets.net
+#emailcontact=webmasterATcyclestreets.net
 
 # Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
 username=nominatim
@@ -15,7 +20,7 @@ password=
 
 # Define the location of the .pdf OSM data file
 # Several option groups here, comment in / out as necessary
-# Andorra
+# Andorra (install, without wikipedia data, takes 12 minutes)
 osmdatafolder=europe/
 osmdatafilename=andorra.osm.pbf
 ## British Isles
