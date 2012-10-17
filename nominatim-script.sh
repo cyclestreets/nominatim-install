@@ -106,17 +106,23 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 # Download OSM data
 sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
+# Logging
+setupLogFile=setupLog.txt
+touch ${setupLogFile}
+echo "#\tImport and index OSM data in progress, follow log file with: tail -f ${setupLogFile}"
+echo "#\tNominatim installation $(date)" >> ${setupLogFile}
+
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
-sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all > setupLog.txt
+sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
 
 # Add special phrases
-sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql
-sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql
-sudo -u ${username} rm specialphrases_countries.sql
-sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql
-sudo -u ${username} psql -d nominatim -f specialphrases.sql
-sudo -u ${username} rm specialphrases.sql
+sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql >> ${setupLogFile}
+sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql >> ${setupLogFile}
+sudo -u ${username} rm -f specialphrases_countries.sql
+sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql >> ${setupLogFile}
+sudo -u ${username} psql -d nominatim -f specialphrases.sql >> ${setupLogFile}
+sudo -u ${username} rm -f specialphrases.sql
 
 # Set up the website for use with Apache
 sudo mkdir -m 755 /var/www/nominatim
