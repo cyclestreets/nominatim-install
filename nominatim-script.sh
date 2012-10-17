@@ -1,50 +1,77 @@
 #!/bin/sh
-exec 3>&1 4>&2
-trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>log.out 2>&1
+# The following method of logging output came from: http://serverfault.com/questions/103501/how-can-i-fully-log-all-bash-scripts-actions
+#exec 3>&1 4>&2
+#trap 'exec 2>&4 1>&3' 0 1 2 3
+#exec 1>log.out 2>&1
 # Everything below will go to the file 'log.out':
 
 # Script to install Nominatim on Ubuntu
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 
+echo "#\tNominatim installation"
+
+### CREDENTIALS ###
+# Location of credentials file
+configFile=.config.sh
+
+# Generate your own credentials file by copying from .config.sh.template
+if [ ! -e ./${configFile} ]; then
+    echo "#\tThe config file, ${configFile}, does not exist - copy your own based on the ${configFile}.template file." 1>&2
+    exit 1
+fi
+
+# Load the credentials
+. ./${configFile}
 
 ### SETTINGS ###
 
-# Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
-username=nominatim
-
 # Define the location of the .pdf OSM data file
-osmdataurl=http://download.geofabrik.de/openstreetmap/europe/great_britain.osm.pbf
-osmdatafilename=great_britain.osm.pbf
+# A couple of option groups here, comment in / out as necessary
+# British Isles
+osmdatafolder=europe/
+osmdatafilename=british_isles.osm.pbf
+# Europe
+osmdatafolder=
+osmdatafilename=europe.osm.pbf
 
-# Define the website hostname and e-mail for the VirtualHost
-websiteurl=nominatim.cyclestreets.net
-emailcontact=webmaster@cyclestreets.net
+# Download url
+osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatafilename}
 
-
+echo "#\t${username}"
+echo "#\t${password}"
+echo "#\t${osmdataurl}"
+echo "#\t${emailcontact}"
 
 ### MAIN PROGRAM ###
 
 # Ensure this script is run as root
 if [ "$(id -u)" != "0" ]; then
-	echo "This script must be run as root" 1>&2
-	exit 1
+	echo "#\tThis script must be run as root" 1>&2
+# !! do not leave in !!
+#	exit 1
 fi
 
 # Request a password for the Nominatim user account; see http://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing
-stty -echo
-printf "Please enter a password that will be used to create the Nominatim user account:"
-read password
-printf "\n"
-printf "Confirm that password:"
-read passwordconfirm
-printf "\n"
-stty echo
-if [ $password != $passwordconfirm ]; then
-	echo "The passwords did not match"
+if [ ! ${password} ]; then
+    stty -echo
+    printf "Please enter a password that will be used to create the Nominatim user account:"
+    read password
+    printf "\n"
+    printf "Confirm that password:"
+    read passwordconfirm
+    printf "\n"
+    stty echo
+    if [ $password != $passwordconfirm ]; then
+	echo "#\tThe passwords did not match"
 	exit 1
+    fi
 fi
+
+echo "#\tPassword: ${password}"
+# !! Development exit
+exit
+
 
 # Create the Nominatim user
 useradd -m -p $password $username
@@ -92,12 +119,15 @@ chmod +x "/home/${username}"
 chmod +x "/home/${username}/Nominatim"
 chmod +x "/home/${username}/Nominatim/module"
 
+# Ensure download folder exists
+mkdir -p data/${osmdatafolder}
+
 # Download OSM data
-wget $osmdataurl
+wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
 # Import and index main OSM data
 cd /home/${username}/Nominatim/
-sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/$osmdatafilename --all
+sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all
 
 # Add special phrases
 sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql

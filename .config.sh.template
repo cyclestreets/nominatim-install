@@ -1,0 +1,11 @@
+#!/bin/sh
+# Contains credentials
+# This is a template file, save as simply .config.sh and set your own values below.
+
+# Define the website hostname and e-mail for the VirtualHost
+websiteurl=nominatim.localhost
+emailcontact=nominatim@localhost
+
+# Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
+username=nominatim
+password=
