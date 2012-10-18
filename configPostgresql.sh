@@ -138,8 +138,6 @@ else
 	exit
 fi
 
-echo "#\tConfiguring for system type: $OS_TYPE, max memory: $MAX_MEM_KB kB, page size: $OS_PAGE_SIZE bytes."
-
 # make sure work_mem isn't greater than total memory divided by number of connections...
 WORK_MEM_KB=$(echo "scale=0; $MAX_MEM_KB/$NUM_CONN" | bc -l)
 if [ $WORK_MEM_KB -gt $WORK_MEM ]; then
@@ -154,6 +152,8 @@ if [ $WORK_MEM_KB -gt $WORK_MEM ]; then
 	WORK_MEM_KB=$WORK_MEM; 
 fi
 WORK_MEM=$(echo "scale=0; $WORK_MEM_KB/1024" | bc -l)MB
+
+echo "#\tConfiguring for system type: $OS_TYPE, max memory: $MAX_MEM_KB kB, page size: $OS_PAGE_SIZE bytes, working memory ${WORK_MEM}."
 
 # OS settings
 HOSTNAME=`hostname`
@@ -180,9 +180,6 @@ SHMMAX=`sysctl $SYSCTL_KERNEL_NAME.shmmax | cut -d'=' -f2`
 # Removed the appended zero from the following line (relative to the original) which had the unjustified effect of making it ten times too big
 OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM_KB * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`
 
-# Development test
-echo "#\tDevelopment test -stopping WIP"
-exit
 if [ $SHMMAX -lt $OPTIMAL_SHMMAX ]; then
 
     sysctl $SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX
@@ -220,10 +217,6 @@ if [ $SHMALL -lt $OPTIMAL_SHMALL ]; then
     pgConfigNote=
 fi
 
-# Development test
-echo "#\tDevelopment test -stopping WIP"
-exit
-
 
 # MAX_MEM_KB as MB
 MAX_MEM_MB=$(echo "scale=0; $MAX_MEM_KB/1024" | bc -l)
@@ -235,6 +228,10 @@ if [ $SHARED_BUFFERS -gt 12000 ]; then
 else
        SHARED_BUFFERS="$SHARED_BUFFERS"MB
 fi
+
+# Development test
+echo "#\tDevelopment test -stopping WIP SHARED_BUFFERS=${SHARED_BUFFERS}"
+exit
 
 if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
        echo "Setting virtual memory sysctls"
