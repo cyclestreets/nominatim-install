@@ -176,16 +176,10 @@ pgConfigNote="\n#\tPostgresql Config - Nominatim Setup\n"
 # SHMMAX
 #
 # (BLOCK_SIZE + 208) * ((MAX_MEM * 1024) / PAGE_SIZE) * $SHARED_BUFFER_RATIO) 
-# On a 6GB machine, with block_size 8192 and page_size 4096, and ratio 25%:
-# (* (+ 8192 208) (/ (* 6095456 1024) 4096) 0.25) = 3200114400.0 = (/ 3200114400 (* 1024 1024))
-# The use of block_size in the above is queried in:
-# http://postgresql.1045698.n5.nabble.com/Memory-usage-and-configuration-settings-td5537421.html
-
 SHMMAX=`sysctl $SYSCTL_KERNEL_NAME.shmmax | cut -d'=' -f2`
-# It is not clear why there is an appended zero on this variable - which has the effect of making it ten times bigger than it should be:
-OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`0
-echo "#\tSHMMAX calculation: echo \"scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO\" | bc -l | cut -d'.' -f1"
-echo "#\tSHMMAX: currently: $SHMMAX, optimal recommended: $OPTIMAL_SHMMAX"
+# Removed the appended zero from the following line (relative to the original) which had the unjustified effect of making it ten times too big
+OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`
+
 # Development test
 echo "#\tDevelopment test -stopping WIP"
 exit
@@ -201,14 +195,15 @@ fi
 #
 # 4096 - 8192
 
-SHMMNI=`sysctl $SYSCTL_KERNEL_NAME.shmmni | cut -d'=' -f2`
-OPTIMAL_SHMMNI=32768 # systems with large amounts of RAM, drop if you don't have 128GB or so...
-if [ $SHMMNI -lt $OPTIMAL_SHMMNI ]; then
-    sysctl $SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI
-    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI" >> /etc/sysctl.conf
-    # Nullify to avoid repeating the note
-    pgConfigNote=
-fi
+# This parameter seems to be best left alone. The suggested 32768 is way too big.
+#SHMMNI=`sysctl $SYSCTL_KERNEL_NAME.shmmni | cut -d'=' -f2`
+#OPTIMAL_SHMMNI=32768 # systems with large amounts of RAM, drop if you don't have 128GB or so...
+#if [ $SHMMNI -lt $OPTIMAL_SHMMNI ]; then
+#    sysctl $SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI
+#    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI" >> /etc/sysctl.conf
+#    # Nullify to avoid repeating the note
+#    pgConfigNote=
+#fi
 
 
 
