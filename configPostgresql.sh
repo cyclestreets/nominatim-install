@@ -6,7 +6,7 @@
 # and modifies $PG_DATA_DIR/postgresql.conf to configure the server
 # for one of three uses:  web, oltp, or data warehousing.
 # 
-# Author: rocket357@users.sourceforge.net
+# Author: rocket357_AT_users.sourceforge.net
 # License: BSD
 #
 # This script uses the conventions found at:
@@ -29,7 +29,11 @@
 #	4) also called "Decision Support" or "Business Intelligence"  
 
 # CHANGELOG
-# v0.1 - Initial post to LQ.org 
+# v0.1 - Initial post to LQ.org
+# This version heavily customized to support a Nominatim installation for CycleStreets
+
+echo "#\tPostgresql configuring based on system memory and recommended formulae"
+
 
 set -e # bomb out if something goes wrong... 
 
@@ -250,45 +254,51 @@ fi
 WAL_BUFFERS="16MB"
 EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM_MB * $EFFECTIVE_CACHE_RATIO" | bc -l | cut -d'.' -f1)MB
 
+# Hard values based on: http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Tuning_PostgreSQL
+MAINT_WORK_MEM=16GB
+SYNCHRONOUS_COMMIT=off
+CHECKPOINT_SEG=100
+CHECKPOINT_TIMEOUT=10min
+CHECKPOINT_COMPLETION_TARGET=0.9
+FSYNC=off
+FULL_PAGE_WRITES=off
 
 ### NOW THE FUN STUFF!!
 echo "#\tApplying system configuration settings to the server"
 echo "#\tThis system appears to have $MAX_MEM_MB MB maximum memory."
 
 if [ -e $CONFIG_FILE ]; then
-	echo "Setting data_directory to:       $PGDATADIR"
-	echo "Setting listen_addresses to:     '*'"
-	echo "Setting port to:                 5432"
-	echo "Setting max_connections to:      $NUM_CONN"
-	echo "Setting shared_buffers to:       $SHARED_BUFFERS"
-	echo "Setting work_mem to:             $WORK_MEM"
-	echo "Setting effective_cache_size to: $EFFECTIVE_CACHE_SIZE"
-	echo "Setting checkpoint_segments to:  $CHECKPOINT_SEG"
-	echo "Setting maintenance_work_mem to: $MAINT_WORK_MEM"
-	echo "Setting wal_buffers to:          $WAL_BUFFERS"
+	echo "#\tApplying the following changes:"
+	echo "#\tshared_buffers                $SHARED_BUFFERS"
+	echo "#\tmaintenance_work_mem          $MAINT_WORK_MEM"
+	echo "#\twork_mem                      $WORK_MEM"
+	echo "#\teffective_cache_size          $EFFECTIVE_CACHE_SIZE"
+	echo "#\tsynchronous_commit            $SYNCHRONOUS_COMMIT"
+	echo "#\tcheckpoint_segments           $CHECKPOINT_SEG"
+	echo "#\tcheckpoint_timeout            $CHECKPOINT_TIMEOUT"
+	echo "#\tcheckpoint_completion_target  $CHECKPOINT_COMPLETION_TARGET"
+	echo "#\tfsync                         $FSYNC"
+	echo "#\tfull_page_writes              $FULL_PAGE_WRITES"
 	
 	echo "#\tApplying the edits to ${TEMP_FILE}";
 	sed \
--e "s@[#]*data_directory = .*@data_directory = \'$PGDATADIR\'@" \
--e "s/[#]*listen_addresses = .*/listen_addresses = \'\*\'/" \
--e "s/[#]*port = .*/port = 5432/" \
--e "s/[#]*max_connections = .*/max_connections = $NUM_CONN/" \
--e "s/[#]*ssl = .*/ssl = false/" \
 -e "s/[#]*shared_buffers = .*/shared_buffers = $SHARED_BUFFERS/" \
+-e "s/[#]*maintenance_work_mem = .*/maintenance_work_mem = $MAINT_WORK_MEM/" \
 -e "s/[#]*work_mem = .*/work_mem = $WORK_MEM/" \
 -e "s/[#]*effective_cache_size = .*/effective_cache_size = $EFFECTIVE_CACHE_SIZE/" \
+-e "s/[#]*synchronous_commit = .*/synchronous_commit = $SYNCHRONOUS_COMMIT/" \
 -e "s/[#]*checkpoint_segments = .*/checkpoint_segments = $CHECKPOINT_SEG/" \
--e "s/[#]*maintenance_work_mem = .*/maintenance_work_mem = $MAINT_WORK_MEM/" \
--e "s/[#]*wal_buffers = .*/wal_buffers = $WAL_BUFFERS/" \
--e "s/[#]*cpu_tuple_cost = .*/cpu_tuple_cost = 0.002/" \
--e "s/[#]*cpu_index_tuple_cost = .*/cpu_index_tuple_cost = 0.0002/" \
--e "s/[#]*cpu_operator_cost = .*/cpu_operator_cost = 0.0005/" \
+-e "s/[#]*checkpoint_timeout = .*/checkpoint_timeout = $CHECKPOINT_TIMEOUT/" \
+-e "s/[#]*checkpoint_completion_target = .*/checkpoint_completion_target = $CHECKPOINT_COMPLETION_TARGET/" \
+-e "s/[#]*fsync = .*/fsync = $FSYNC/" \
+-e "s/[#]*full_page_writes = .*/full_page_writes = $FULL_PAGE_WRITES/" \
 $CONFIG_FILE > $TEMP_FILE
-#	mv $TEMP_FILE $CONFIG_FILE
 
-else
-	echo "Unable to locate the PostgreSQL config file!  Can't continue!"
-	exit 1
+	# Make the change
+	mv $TEMP_FILE $CONFIG_FILE
 fi 
 
-echo "#\tCompleted Postgresql autoConfiguration based on formulas analyzing available memory"
+echo "#\tCompleted Postgresql autoConfiguration based on formulae that analyze available memory"
+echo "#\tRestart postgres for the changes to come into effect"
+
+# Ends
