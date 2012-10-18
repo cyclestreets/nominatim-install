@@ -138,7 +138,7 @@ else
 	exit
 fi
 
-echo "#\tConfiguring for a $OS_TYPE system"
+echo "#\tConfiguring for system type: $OS_TYPE, max memory: $MAX_MEM kB, page size: $OS_PAGE_SIZE bytes."
 
 # make sure work_mem isn't greater than total memory divided by number of connections...
 WORK_MEM_KB=$(echo "scale=0; $MAX_MEM/$NUM_CONN" | bc -l)
@@ -168,23 +168,34 @@ HOSTNAME=`hostname`
 # 	max_fsm_pages 
 
 echo "#\tChecking the current kernel's shared memory settings..."
+# The sysctl calls below echo their own output.
 
-# Development test
-echo "#\tDevelopment test -stopping WIP"
-exit
-
+# Changes to files will be made below
+pgConfigNote="\n#\tPostgresql Config - Nominatim Setup\n"
 
 # SHMMAX
 #
 # (BLOCK_SIZE + 208) * ((MAX_MEM * 1024) / PAGE_SIZE) * $SHARED_BUFFER_RATIO) 
+# On a 6GB machine, with block_size 8192 and page_size 4096, and ratio 25%:
+# (* (+ 8192 208) (/ (* 6095456 1024) 4096) 0.25) = 3200114400.0 = (/ 3200114400 (* 1024 1024))
+# The use of block_size in the above is queried in:
+# http://postgresql.1045698.n5.nabble.com/Memory-usage-and-configuration-settings-td5537421.html
 
 SHMMAX=`sysctl $SYSCTL_KERNEL_NAME.shmmax | cut -d'=' -f2`
+# It is not clear why there is an appended zero on this variable - which has the effect of making it ten times bigger than it should be:
 OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`0
+echo "#\tSHMMAX calculation: echo \"scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO\" | bc -l | cut -d'.' -f1"
+echo "#\tSHMMAX: currently: $SHMMAX, optimal recommended: $OPTIMAL_SHMMAX"
+# Development test
+echo "#\tDevelopment test -stopping WIP"
+exit
 if [ $SHMMAX -lt $OPTIMAL_SHMMAX ]; then
-	sysctl $SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX
-	echo "$SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX" >> /etc/sysctl.conf
-fi
 
+    sysctl $SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX
+    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX" >> /etc/sysctl.conf
+    # Nullify to avoid repeating the note
+    pgConfigNote=
+fi
 
 # SHMMNI
 #
@@ -193,9 +204,12 @@ fi
 SHMMNI=`sysctl $SYSCTL_KERNEL_NAME.shmmni | cut -d'=' -f2`
 OPTIMAL_SHMMNI=32768 # systems with large amounts of RAM, drop if you don't have 128GB or so...
 if [ $SHMMNI -lt $OPTIMAL_SHMMNI ]; then
-	sysctl $SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI
-	echo "$SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI" >> /etc/sysctl.conf
+    sysctl $SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI
+    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmni=$OPTIMAL_SHMMNI" >> /etc/sysctl.conf
+    # Nullify to avoid repeating the note
+    pgConfigNote=
 fi
+
 
 
 # SHMALL
@@ -205,9 +219,15 @@ fi
 SHMALL=`sysctl $SYSCTL_KERNEL_NAME.shmall | cut -d'=' -f2`
 OPTIMAL_SHMALL=`echo "scale=0; $OPTIMAL_SHMMAX / $OS_PAGE_SIZE" | bc -l | cut -d'.' -f1`
 if [ $SHMALL -lt $OPTIMAL_SHMALL ]; then
-	sysctl $SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL
-	echo "$SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL" >> /etc/sysctl.conf
+    sysctl $SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL
+    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL" >> /etc/sysctl.conf
+    # Nullify to avoid repeating the note
+    pgConfigNote=
 fi
+
+# Development test
+echo "#\tDevelopment test -stopping WIP"
+exit
 
 
 # convert MAX_MEM to MB
