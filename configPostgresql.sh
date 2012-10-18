@@ -122,14 +122,14 @@ OS_TYPE=`uname -s`
 if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
 
 	SYSCTL_KERNEL_NAME="kernel"
-	MAX_MEM=`grep MemTotal /proc/meminfo | sed -e 's/^[^0-9]*//' | cut -d' ' -f1`
+	MAX_MEM_KB=`grep MemTotal /proc/meminfo | sed -e 's/^[^0-9]*//' | cut -d' ' -f1`
 	OS_PAGE_SIZE=`getconf PAGE_SIZE`
 
 ### OPENBSD
 elif [ "$OS_TYPE" = "OpenBSD" ]; then
 
 	SYSCTL_KERNEL_NAME="kern.shminfo"
-	MAX_MEM=$(echo "scale=0; `dmesg | grep \"real mem\" | cut -d\"=\" -f2 | cut -d\"(\" -f1`/1024" | bc -l ) # convert to kB
+	MAX_MEM_KB=$(echo "scale=0; `dmesg | grep \"real mem\" | cut -d\"=\" -f2 | cut -d\"(\" -f1`/1024" | bc -l ) # convert to kB
 	OS_PAGE_SIZE=`sysctl hw.pagesize | cut -d'=' -f2`
 
 ### UNKNOWN?
@@ -138,10 +138,10 @@ else
 	exit
 fi
 
-echo "#\tConfiguring for system type: $OS_TYPE, max memory: $MAX_MEM kB, page size: $OS_PAGE_SIZE bytes."
+echo "#\tConfiguring for system type: $OS_TYPE, max memory: $MAX_MEM_KB kB, page size: $OS_PAGE_SIZE bytes."
 
 # make sure work_mem isn't greater than total memory divided by number of connections...
-WORK_MEM_KB=$(echo "scale=0; $MAX_MEM/$NUM_CONN" | bc -l)
+WORK_MEM_KB=$(echo "scale=0; $MAX_MEM_KB/$NUM_CONN" | bc -l)
 if [ $WORK_MEM_KB -gt $WORK_MEM ]; then
 	while [ $WORK_MEM -lt $WORK_MEM_KB ]; do
 		WORK_MEM_TEMP=$(echo "scale=0; $WORK_MEM*2" | bc -l)
@@ -175,10 +175,10 @@ pgConfigNote="\n#\tPostgresql Config - Nominatim Setup\n"
 
 # SHMMAX
 #
-# (BLOCK_SIZE + 208) * ((MAX_MEM * 1024) / PAGE_SIZE) * $SHARED_BUFFER_RATIO) 
+# (BLOCK_SIZE + 208) * ((MAX_MEM_KB * 1024) / PAGE_SIZE) * $SHARED_BUFFER_RATIO) 
 SHMMAX=`sysctl $SYSCTL_KERNEL_NAME.shmmax | cut -d'=' -f2`
 # Removed the appended zero from the following line (relative to the original) which had the unjustified effect of making it ten times too big
-OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`
+OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM_KB * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`
 
 # Development test
 echo "#\tDevelopment test -stopping WIP"
@@ -225,9 +225,9 @@ echo "#\tDevelopment test -stopping WIP"
 exit
 
 
-# convert MAX_MEM to MB
-MAX_MEM=$(echo "scale=0; $MAX_MEM/1024" | bc -l)
-SHARED_BUFFERS=$(echo "scale=0; $MAX_MEM * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1)
+# MAX_MEM_KB as MB
+MAX_MEM_MB=$(echo "scale=0; $MAX_MEM_KB/1024" | bc -l)
+SHARED_BUFFERS=$(echo "scale=0; $MAX_MEM_MB * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1)
 # There has been debate on this value on the postgresql mailing lists.
 # You might not get any performance gain over 8 GB.  Please test!
 if [ $SHARED_BUFFERS -gt 12000 ]; then
@@ -245,7 +245,7 @@ if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
 
        # >8GB RAM?  Don't let dirty data build up...this can cause latency issues!
        # These settings taken from "PostgreSQL 9.0 High Performance" by Gregory Smith
-       if [ $MAX_MEM -gt 8192 ]; then 
+       if [ $MAX_MEM_MB -gt 8192 ]; then 
              echo 2 > /proc/sys/vm/dirty_ratio
              echo 1 > /proc/sys/vm/dirty_background_ratio
        else
@@ -255,14 +255,14 @@ if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
 fi
 
 WAL_BUFFERS="16MB"
-EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM * $EFFECTIVE_CACHE_RATIO" | bc -l | cut -d'.' -f1)MB
+EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM_MB * $EFFECTIVE_CACHE_RATIO" | bc -l | cut -d'.' -f1)MB
 
 
 ### NOW THE FUN STUFF!!
 echo "Applying system configuration settings to the server..."
 
  
-echo "This system appears to have $MAX_MEM MB maximum memory..."
+echo "This system appears to have $MAX_MEM_MB MB maximum memory..."
 
 if [ -e $CONFIG_FILE ]; then
 	echo "Setting data_directory to:       $PGDATADIR"
