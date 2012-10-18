@@ -39,6 +39,7 @@ if [ ! `whoami` = 'root' ]; then
 	exit
 fi
 
+# Check if the 'usage' parameter has been supplied
 if [ -z "$1" ]; then
 	echo "Usage:  ./configPG.sh [template]"
 	echo "Where [template] is one of:"
@@ -50,17 +51,27 @@ if [ -z "$1" ]; then
 	exit
 fi
 
-echo -n "Will this machine be dedicated (i.e. PostgreSQL is the only active service)? (y/n) "
-read dedicated
+# Check if the 'dedicated' parameter has been supplied
+if [ -z "$2" ]; then
+    echo -n "Will this machine be dedicated (i.e. PostgreSQL is the only active service)? (y/n) "
+    read dedicated
+else
+    dedicated=$2
+fi
+
+echo "#\tConfiguring as usage type: $1, Dedicated PostgreSQL server: ${dedicated}"
 
 ###################################
 ### USER CONFIGURABLE VARIABLES ###
 ################################### 
 
+# Postgres version
+PGver=9.1
+
 # These variables are for Debian...be sure to alter them if your OS is different!
 PGHOMEDIR=/var/lib/postgresql
-PGDATADIR=$PGHOMEDIR/8.4/main
-CONFIG_FILE=/etc/postgresql/8.4/main/postgresql.conf
+PGDATADIR=$PGHOMEDIR/$PGver/main
+CONFIG_FILE=/etc/postgresql/$PGver/main/postgresql.conf
 TEMP_FILE=${CONFIG_FILE}.TMP 
 
 # These two are taken from performance-whack-a-mole (see link in header comments)
@@ -95,10 +106,13 @@ fi
 
 # first let's locate the configuration file...
 if [ -e $CONFIG_FILE ]; then
-	echo "Backing up original config file to $CONFIG_FILE.BACKUP"
+	echo "#\tBacking up original config file to $CONFIG_FILE.BACKUP"
 	cp $CONFIG_FILE $CONFIG_FILE.BACKUP
-	echo "Backing up /etc/sysctl.conf to $PGHOMEDIR/sysctl.conf.BACKUP"
+	echo "#\tBacking up /etc/sysctl.conf to $PGHOMEDIR/sysctl.conf.BACKUP"
 	cp /etc/sysctl.conf $PGHOMEDIR/sysctl.conf.BACKUP
+else
+	echo "#\tUnable to locate the PostgreSQL config file. Cannot continue, stopping."
+	exit 1
 fi
 
 
@@ -120,11 +134,11 @@ elif [ "$OS_TYPE" = "OpenBSD" ]; then
 
 ### UNKNOWN?
 else
-	echo "$OS_TYPE isn't supported!  Please send an e-mail to rocket357@users.sourceforge.net to have this OS added!"
+	echo "$OS_TYPE isn't supported"
 	exit
 fi
 
-echo "Done!"
+echo "#\tConfiguring for a $OS_TYPE system"
 
 # make sure work_mem isn't greater than total memory divided by number of connections...
 WORK_MEM_KB=$(echo "scale=0; $MAX_MEM/$NUM_CONN" | bc -l)
@@ -153,7 +167,11 @@ HOSTNAME=`hostname`
 # 	max_fsm_relations
 # 	max_fsm_pages 
 
-echo -n "Checking the current kernel's shared memory settings..."
+echo "#\tChecking the current kernel's shared memory settings..."
+
+# Development test
+echo "#\tDevelopment test -stopping WIP"
+exit
 
 
 # SHMMAX
