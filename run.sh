@@ -73,6 +73,14 @@ apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
 # PHP Pear::DB is needed for the runtime website
 pear install DB >> ${setupLogFile}
 
+# Tuning PostgreSQL
+# These allow a 16GB value for shmmax (not shmall is in pages, which are usually size 4096, try: getconf PAGE_SIZE)
+# sudo sysctl -w kernel.shmmax=17179869184
+# sudo sysctl -w kernel.shmall=4194304
+# Useful but complex script at...
+# http://www.linuxquestions.org/questions/blog/rocket357-328529/updated-postgresql-auto-configure-script-3627/
+
+
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd ~${username}
 
