@@ -1,0 +1,6 @@
+# Ignore emacs temporary files, which end in ~
+*~
+# Ignore this log file
+setupLog.txt
+# Ignore the instantiated copy of the config template
+.config.sh
