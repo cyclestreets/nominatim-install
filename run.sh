@@ -74,7 +74,7 @@ apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
 pear install DB >> ${setupLogFile}
 
 # Tuning PostgreSQL
-. ./configPostgresql.sh oltp n
+./configPostgresql.sh oltp n
 
 # Restart postgres assume the new config
 service postgresql restart
