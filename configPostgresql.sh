@@ -229,12 +229,8 @@ else
        SHARED_BUFFERS="$SHARED_BUFFERS"MB
 fi
 
-# Development test
-echo "#\tDevelopment test -stopping WIP SHARED_BUFFERS=${SHARED_BUFFERS}"
-exit
-
 if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
-       echo "Setting virtual memory sysctls"
+       echo "#\tSetting virtual memory sysctls"
        sysctl vm.swappiness=0
        echo "vm.swappiness=0" >>/etc/sysctl.conf
        sysctl vm.overcommit_memory=2
@@ -256,10 +252,8 @@ EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM_MB * $EFFECTIVE_CACHE_RATIO" | bc
 
 
 ### NOW THE FUN STUFF!!
-echo "Applying system configuration settings to the server..."
-
- 
-echo "This system appears to have $MAX_MEM_MB MB maximum memory..."
+echo "#\tApplying system configuration settings to the server"
+echo "#\tThis system appears to have $MAX_MEM_MB MB maximum memory."
 
 if [ -e $CONFIG_FILE ]; then
 	echo "Setting data_directory to:       $PGDATADIR"
@@ -273,6 +267,7 @@ if [ -e $CONFIG_FILE ]; then
 	echo "Setting maintenance_work_mem to: $MAINT_WORK_MEM"
 	echo "Setting wal_buffers to:          $WAL_BUFFERS"
 	
+	echo "#\tApplying the edits to ${TEMP_FILE}";
 	sed \
 -e "s@[#]*data_directory = .*@data_directory = \'$PGDATADIR\'@" \
 -e "s/[#]*listen_addresses = .*/listen_addresses = \'\*\'/" \
@@ -289,11 +284,11 @@ if [ -e $CONFIG_FILE ]; then
 -e "s/[#]*cpu_index_tuple_cost = .*/cpu_index_tuple_cost = 0.0002/" \
 -e "s/[#]*cpu_operator_cost = .*/cpu_operator_cost = 0.0005/" \
 $CONFIG_FILE > $TEMP_FILE
-	mv $TEMP_FILE $CONFIG_FILE
+#	mv $TEMP_FILE $CONFIG_FILE
 
 else
 	echo "Unable to locate the PostgreSQL config file!  Can't continue!"
 	exit 1
 fi 
 
-echo "Done!"
+echo "#\tCompleted Postgresql autoConfiguration based on formulas analyzing available memory"
