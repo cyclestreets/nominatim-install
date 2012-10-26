@@ -11,6 +11,9 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# Bomb out if something goes wrong
+set -e
+
 ### CREDENTIALS ###
 # Name of the credentials file
 configFile=.config.sh

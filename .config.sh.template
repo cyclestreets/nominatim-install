@@ -30,6 +30,7 @@ password=
 #osmdatafolder=europe/
 #osmdatafilename=iceland.osm.pbf
 ## Europe
+# On a machine with 64GB ram and four processors takes 2.5 days to complete the initial install Oct 2012.
 osmdatafolder=
 osmdatafilename=europe.osm.pbf
 
