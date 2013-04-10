@@ -63,14 +63,19 @@ echo "#\tNominatim user ${username} created" >> ${setupLogFile}
 apt-get -y install wget git >> ${setupLogFile}
 
 # Install Apache, PHP
+echo "\n#\tInstalling Apache, PHP" >> ${setupLogFile}
 apt-get -y install apache2 php5 >> ${setupLogFile}
 
 # Install Postgres, PostGIS and dependencies
-apt-get -y install php5-pgsql postgis postgresql php5 php-pear gcc proj libgeos-c1 postgresql-contrib git osmosis >> ${setupLogFile}
+echo "\n#\tInstalling postgres" >> ${setupLogFile}
+apt-get -y install php5-pgsql postgis postgresql php-pear gcc proj libgeos-c1 postgresql-contrib osmosis >> ${setupLogFile}
+echo "\n#\tInstalling postgres link to postgis" >> ${setupLogFile}
 apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
-apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev >> ${setupLogFile}
+echo "\n#\tInstalling geos" >> ${setupLogFile}
+apt-get -y install build-essential libxml2-dev libgeos-dev libgeos++-dev libpq-dev libbz2-dev libtool automake libproj-dev >> ${setupLogFile}
 
 # Add Protobuf support
+echo "\n#\tInstalling protobuf" >> ${setupLogFile}
 apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
 
 # PHP Pear::DB is needed for the runtime website
@@ -154,13 +159,18 @@ cat > /etc/apache2/sites-available/nominatim << EOF
 EOF
 
 # Add local Nominatim settings
-cat > /home/nominatim/Nominatim/settings/local.php << EOF
+localNominatimSettings=/home/nominatim/Nominatim/settings/local.php
+
+cat > ${localNominatimSettings} << EOF
 <?php
    // Paths
    @define('CONST_Postgresql_Version', '9.1');
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
+
+# Change to Nominatim ownership
+chown ${username}:${username} ${localNominatimSettings}
 
 # Enable the VirtualHost and restart Apache
 a2ensite nominatim
