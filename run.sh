@@ -126,9 +126,14 @@ else
 fi
 
 # Get Wikipedia data which helps with name importance hinting
-# !! These steps take a while and are not necessary during testing of this script
-sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+# These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
+# Only download them if they are not already present
+if [ ! -r data/wikipedia_article.sql.bin ]; then
+    sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+fi
+if [ ! -r data/wikipedia_redirect.sql.bin ]; then
+    sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+fi
 
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
