@@ -169,7 +169,7 @@ cat > ${localNominatimSettings} << EOF
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
 
-# Change to Nominatim ownership
+# Change settings file to Nominatim ownership
 chown ${username}:${username} ${localNominatimSettings}
 
 # Enable the VirtualHost and restart Apache
