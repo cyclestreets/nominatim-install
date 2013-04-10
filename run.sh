@@ -226,4 +226,11 @@ chown ${username}:${username} ${localNominatimSettings}
 a2ensite nominatim
 service apache2 reload
 
+echo "#\tNominatim website created $(date)" >> ${setupLogFile}
+
+# Setting up the update process
+sudo -u ${username} ./utils/setup.php --osmosis-init
+sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
+
+# Done
 echo "#\tNominatim installation completed $(date)" >> ${setupLogFile}
