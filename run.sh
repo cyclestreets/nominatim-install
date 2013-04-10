@@ -90,10 +90,17 @@ apt-get -y install build-essential libxml2-dev libgeos-dev libgeos++-dev libpq-d
 echo "\n#\tInstalling protobuf" >> ${setupLogFile}
 apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
 
-#idempotent
+# Temporarily allow commands to fail without exiting the script
+set +e
 
 # PHP Pear::DB is needed for the runtime website
+# There doesn't seem an easy way to avoid this failing if it is already installed.
 pear install DB >> ${setupLogFile}
+
+# Bomb out if something goes wrong
+set -e
+
+#idempotent
 
 # Tuning PostgreSQL
 ./configPostgresql.sh oltp n
