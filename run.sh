@@ -100,8 +100,6 @@ pear install DB >> ${setupLogFile}
 # Bomb out if something goes wrong
 set -e
 
-#idempotent
-
 # Tuning PostgreSQL
 ./configPostgresql.sh oltp n
 
@@ -123,11 +121,14 @@ sudo -u ${username} make >> ${setupLogFile}
 sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
 sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
+#idempotent
+# http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
-sudo -u postgres createuser -s $username
+sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${username}'" | grep -q 1 || sudo -u postgres createuser -s $username
 
 # Create website user in Postgres
-sudo -u postgres createuser -SDR www-data
+websiteUser=www-data
+sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${websiteUser}'" | grep -q 1 || sudo -u postgres createuser -SDR ${websiteUser}
 
 # Nominatim module reading permissions
 chmod +x "/home/${username}"
