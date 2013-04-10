@@ -41,6 +41,8 @@ touch ${setupLogFile}
 echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
 echo "#\tNominatim installation $(date)" >> ${setupLogFile}
 
+#!! Comments for testing idempotency
+if false; then
 # Ensure there is a nominatim user account
 if id -u ${username} >/dev/null 2>&1; then
     echo "#	User ${username} exists already and will be used."
@@ -105,23 +107,31 @@ set -e
 
 # Restart postgres assume the new config
 service postgresql restart
-
+#!! Comments for testing idempotency
+fi
 # We will use the Nominatim user's homedir for the installation, so switch to that
-eval cd ~${username}
+eval cd /home/${username}
 
 # Nominatim software
-sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
-cd Nominatim
-sudo -u ${username} ./autogen.sh >> ${setupLogFile}
-sudo -u ${username} ./configure --enable-64bit-ids >> ${setupLogFile}
-sudo -u ${username} make >> ${setupLogFile}
+if [ ! -d "/home/${username}/Nominatim/.git" ]; then
+    # Install
+    sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
+    cd Nominatim
+    sudo -u ${username} ./autogen.sh >> ${setupLogFile}
+    sudo -u ${username} ./configure --enable-64bit-ids >> ${setupLogFile}
+    sudo -u ${username} make >> ${setupLogFile}
+else
+    # Update
+    cd Nominatim
+    git pull
+fi
 
 # Get Wikipedia data which helps with name importance hinting
 # !! These steps take a while and are not necessary during testing of this script
-sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+#!! Comments for testing idempotency
+#sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+#sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
-#idempotent
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${username}'" | grep -q 1 || sudo -u postgres createuser -s $username
@@ -138,6 +148,7 @@ chmod +x "/home/${username}/Nominatim/module"
 # Ensure download folder exists
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
+#idempotent
 # Download OSM data
 sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
