@@ -30,7 +30,9 @@ fi
 . ./${configFile}
 
 # Download url
+osmdatafilename=${osmdatacountry}-latest.osm.pbf
 osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatafilename}
+osmupdates=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatacountry}-updates
 
 ### MAIN PROGRAM ###
 
@@ -149,16 +151,22 @@ chmod +x "/home/${username}/Nominatim/module"
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data
-sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+#!! Comments for testing idempotency
+#sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
 # Remove any pre-existing nominatim database
-sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
+#sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
+
+#!! Comments for testing idempotency
+#osm2pgsqlcache=""
+# Small cache
+osm2pgsqlcache="--osm2pgsql-cache 50"
 
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
-sudo -u ${username} ./utils/setup.php --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
+#sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
 echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
 
 # Add special phrases
@@ -172,7 +180,7 @@ sudo -u ${username} rm -f specialphrases.sql
 echo "#\tDone special phrases $(date)" >> ${setupLogFile}
 
 # Set up the website for use with Apache
-sudo mkdir -m 755 /var/www/nominatim
+sudo mkdir -pm 755 /var/www/nominatim
 sudo chown ${username} /var/www/nominatim
 sudo -u ${username} ./utils/setup.php --create-website /var/www/nominatim
 
@@ -204,6 +212,11 @@ cat > ${localNominatimSettings} << EOF
    @define('CONST_Postgresql_Version', '9.1');
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
+   // Setting up the update process
+   @define('CONST_Replication_Url', '${osmupdates}');
+   @define('CONST_Replication_MaxInterval', '259200');     // Process up to 3 days updates in a run
+   @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
+   @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
 EOF
 
 # Change settings file to Nominatim ownership

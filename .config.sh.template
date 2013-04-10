@@ -22,15 +22,15 @@ password=
 # Several option groups here, comment in / out as necessary
 # Andorra (install, without wikipedia data, takes 12 minutes)
 #osmdatafolder=europe/
-#osmdatafilename=andorra-latest.osm.pbf
+#osmdatacountry=andorra
 ## British Isles
 #osmdatafolder=europe/
-#osmdatafilename=british_isles-latest.osm.pbf
+#osmdatacountry=british_isles
 ## Iceland
 #osmdatafolder=europe/
-#osmdatafilename=iceland-latest.osm.pbf
+#osmdatacountry=iceland
 ## Europe
 # On a machine with 64GB ram and four processors takes 2.5 days to complete the initial install Oct 2012.
 osmdatafolder=
-osmdatafilename=europe-latest.osm.pbf
+osmdatacountry=europe
 
