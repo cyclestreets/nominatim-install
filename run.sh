@@ -3,7 +3,7 @@
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 
-# !! Marker #idempotent indicates limit of testing for idempotency.
+# !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
 echo "#\tNominatim installation $(date)"
 
@@ -148,9 +148,13 @@ chmod +x "/home/${username}/Nominatim/module"
 # Ensure download folder exists
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
-#idempotent
 # Download OSM data
 sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+
+#idempotent
+# Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
+# Remove any pre-existing nominatim database
+sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
