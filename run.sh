@@ -43,8 +43,6 @@ touch ${setupLogFile}
 echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
 echo "#\tNominatim installation $(date)" >> ${setupLogFile}
 
-#!! Comments for testing idempotency
-if false; then
 # Ensure there is a nominatim user account
 if id -u ${username} >/dev/null 2>&1; then
     echo "#	User ${username} exists already and will be used."
@@ -109,8 +107,7 @@ set -e
 
 # Restart postgres assume the new config
 service postgresql restart
-#!! Comments for testing idempotency
-fi
+
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd /home/${username}
 
@@ -130,9 +127,8 @@ fi
 
 # Get Wikipedia data which helps with name importance hinting
 # !! These steps take a while and are not necessary during testing of this script
-#!! Comments for testing idempotency
-#sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
-#sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
@@ -151,22 +147,21 @@ chmod +x "/home/${username}/Nominatim/module"
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data
-#!! Comments for testing idempotency
-#sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
 # Remove any pre-existing nominatim database
-#sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
+sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
-#!! Comments for testing idempotency
-#osm2pgsqlcache=""
-# Small cache
-osm2pgsqlcache="--osm2pgsql-cache 50"
+# Default cache
+osm2pgsqlcache=
+# Small cache - needed on test machine
+#osm2pgsqlcache="--osm2pgsql-cache 50"
 
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
-#sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
+sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
 echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
 
 # Add special phrases
@@ -234,3 +229,5 @@ sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
 
 # Done
 echo "#\tNominatim installation completed $(date)" >> ${setupLogFile}
+
+# End of file
