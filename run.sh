@@ -3,6 +3,8 @@
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 
+# !! Marker #idempotent indicates limit of testing for idempotency.
+
 echo "#\tNominatim installation $(date)"
 
 # Ensure this script is run as root
@@ -39,25 +41,35 @@ touch ${setupLogFile}
 echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
 echo "#\tNominatim installation $(date)" >> ${setupLogFile}
 
-# Request a password for the Nominatim user account; see http://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing
-if [ ! ${password} ]; then
-    stty -echo
-    printf "Please enter a password that will be used to create the Nominatim user account:"
-    read password
-    printf "\n"
-    printf "Confirm that password:"
-    read passwordconfirm
-    printf "\n"
-    stty echo
-    if [ $password != $passwordconfirm ]; then
-	echo "#\tThe passwords did not match"
-	exit 1
+# Ensure there is a nominatim user account
+if id -u ${username} >/dev/null 2>&1; then
+    echo "#	User ${username} exists already and will be used."
+else
+    echo "#	User ${username} does not exist: creating now."
+
+    # Request a password for the Nominatim user account; see http://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing
+    if [ ! ${password} ]; then
+	stty -echo
+	printf "Please enter a password that will be used to create the Nominatim user account:"
+	read password
+	printf "\n"
+	printf "Confirm that password:"
+	read passwordconfirm
+	printf "\n"
+	stty echo
+	if [ $password != $passwordconfirm ]; then
+	    echo "#\tThe passwords did not match"
+	    exit 1
+	fi
     fi
+
+    # Create the nominatim user
+    useradd -m -p $password $username
+    echo "#\tNominatim user ${username} created" >> ${setupLogFile}
 fi
 
-# Create the Nominatim user
-useradd -m -p $password $username
-echo "#\tNominatim user ${username} created" >> ${setupLogFile}
+# Prepare the apt index; it may be practically non-existent on a fresh VM
+apt-get update > /dev/null
 
 # Install basic software
 apt-get -y install wget git >> ${setupLogFile}
@@ -77,6 +89,8 @@ apt-get -y install build-essential libxml2-dev libgeos-dev libgeos++-dev libpq-d
 # Add Protobuf support
 echo "\n#\tInstalling protobuf" >> ${setupLogFile}
 apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
+
+#idempotent
 
 # PHP Pear::DB is needed for the runtime website
 pear install DB >> ${setupLogFile}
