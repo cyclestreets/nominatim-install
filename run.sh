@@ -127,11 +127,11 @@ fi
 
 # Get Wikipedia data which helps with name importance hinting
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
-# Only download them if they are not already present
-if [ ! -r data/wikipedia_article.sql.bin ]; then
+# Download them if they are not already present or older than 30 days.
+if test ! -r data/wikipedia_article.sql.bin || ! test `find data/wikipedia_article.sql.bin -mtime -30`; then
     sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
 fi
-if [ ! -r data/wikipedia_redirect.sql.bin ]; then
+if test ! -r data/wikipedia_redirect.sql.bin || ! test `find data/wikipedia_redirect.sql.bin -mtime -30`; then
     sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 fi
 
@@ -151,8 +151,10 @@ chmod +x "/home/${username}/Nominatim/module"
 # Ensure download folder exists
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
-# Download OSM data
-sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+# Download OSM data (if more than a day old)
+if test ! -r data/${osmdatafolder}${osmdatafilename} || ! test `find data/${osmdatafolder}${osmdatafilename} -mtime -1`; then
+    sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+fi
 
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
