@@ -25,7 +25,7 @@ password=
 #osmdatacountry=andorra
 ## British Isles
 #osmdatafolder=europe/
-#osmdatacountry=british_isles
+#osmdatacountry=british-isles
 ## Iceland
 #osmdatafolder=europe/
 #osmdatacountry=iceland
