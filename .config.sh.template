@@ -15,6 +15,10 @@ emailcontact=webmasterATcyclestreets.net
 username=nominatim
 password=
 
+# Default cache
+osm2pgsqlcache=
+# Small cache - needed on test machine
+#osm2pgsqlcache="--osm2pgsql-cache 250"
 
 ### SETTINGS ###
 

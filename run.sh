@@ -161,11 +161,6 @@ fi
 # Remove any pre-existing nominatim database
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
-# Default cache
-osm2pgsqlcache=
-# Small cache - needed on test machine
-#osm2pgsqlcache="--osm2pgsql-cache 50"
-
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
