@@ -161,6 +161,25 @@ fi
 # Remove any pre-existing nominatim database
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
+# Add local Nominatim settings
+localNominatimSettings=/home/nominatim/Nominatim/settings/local.php
+
+cat > ${localNominatimSettings} << EOF
+<?php
+   // Paths
+   @define('CONST_Postgresql_Version', '9.1');
+   // Website settings
+   @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
+   // Setting up the update process
+   @define('CONST_Replication_Url', '${osmupdates}');
+   @define('CONST_Replication_MaxInterval', '259200');     // Process up to 3 days updates in a run
+   @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
+   @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
+EOF
+
+# Change settings file to Nominatim ownership
+chown ${username}:${username} ${localNominatimSettings}
+
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
@@ -199,25 +218,6 @@ cat > /etc/apache2/sites-available/nominatim << EOF
         AddType text/html .php
 </VirtualHost>
 EOF
-
-# Add local Nominatim settings
-localNominatimSettings=/home/nominatim/Nominatim/settings/local.php
-
-cat > ${localNominatimSettings} << EOF
-<?php
-   // Paths
-   @define('CONST_Postgresql_Version', '9.1');
-   // Website settings
-   @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
-   // Setting up the update process
-   @define('CONST_Replication_Url', '${osmupdates}');
-   @define('CONST_Replication_MaxInterval', '259200');     // Process up to 3 days updates in a run
-   @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
-   @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
-EOF
-
-# Change settings file to Nominatim ownership
-chown ${username}:${username} ${localNominatimSettings}
 
 # Enable the VirtualHost and restart Apache
 a2ensite nominatim
