@@ -31,8 +31,8 @@ fi
 
 # Download url
 osmdatafilename=${osmdatacountry}-latest.osm.pbf
-osmdataurl=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatafilename}
-osmupdates=http://download.geofabrik.de/openstreetmap/${osmdatafolder}${osmdatacountry}-updates
+osmdataurl=http://download.geofabrik.de/${osmdatafolder}${osmdatafilename}
+osmupdates=http://download.geofabrik.de/${osmdatafolder}${osmdatacountry}-updates
 
 ### MAIN PROGRAM ###
 
