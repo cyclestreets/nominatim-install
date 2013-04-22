@@ -201,6 +201,12 @@ sudo mkdir -pm 755 ${wwwNominatim}
 sudo chown ${username} ${wwwNominatim}
 sudo -u ${username} ./utils/setup.php --create-website ${wwwNominatim}
 
+# Write out a robots file to keep search engines out
+sudo -u ${username} cat > ${wwwNominatim}/robots.txt <<EOF
+User-agent: *
+Disallow: /
+EOF
+
 # Create a VirtalHost for Apache
 cat > /etc/apache2/sites-available/nominatim << EOF
 <VirtualHost *:80>
