@@ -196,20 +196,21 @@ sudo -u ${username} rm -f specialphrases.sql
 echo "#\tDone special phrases $(date)" >> ${setupLogFile}
 
 # Set up the website for use with Apache
-sudo mkdir -pm 755 /var/www/nominatim
-sudo chown ${username} /var/www/nominatim
-sudo -u ${username} ./utils/setup.php --create-website /var/www/nominatim
+wwwNominatim=/var/www/nominatim
+sudo mkdir -pm 755 ${wwwNominatim}
+sudo chown ${username} ${wwwNominatim}
+sudo -u ${username} ./utils/setup.php --create-website ${wwwNominatim}
 
 # Create a VirtalHost for Apache
 cat > /etc/apache2/sites-available/nominatim << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
         ServerAdmin ${emailcontact}
-        DocumentRoot /var/www/nominatim
+        DocumentRoot ${wwwNominatim}
         CustomLog \${APACHE_LOG_DIR}/access.log combined
         ErrorLog \${APACHE_LOG_DIR}/error.log
         LogLevel warn
-        <Directory /var/www/nominatim>
+        <Directory ${wwwNominatim}>
                 Options FollowSymLinks MultiViews
                 AllowOverride None
                 Order allow,deny
