@@ -235,6 +235,9 @@ echo "#\tNominatim website created $(date)" >> ${setupLogFile}
 
 # Setting up the update process
 sudo -u ${username} ./utils/setup.php --osmosis-init
+echo "#\tDone setup $(date)" >> ${setupLogFile}
+
+# Updating Nominatim
 sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
 
 # Done
