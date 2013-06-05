@@ -118,7 +118,7 @@ if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
     cd Nominatim
     sudo -u ${username} ./autogen.sh >> ${setupLogFile}
-    sudo -u ${username} ./configure --enable-64bit-ids >> ${setupLogFile}
+    sudo -u ${username} ./configure >> ${setupLogFile}
     sudo -u ${username} make >> ${setupLogFile}
 else
     # Update
