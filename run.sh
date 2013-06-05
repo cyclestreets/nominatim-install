@@ -86,7 +86,8 @@ apt-get -y install php5-pgsql postgis postgresql php-pear gcc proj-bin libgeos-c
 echo "\n#\tInstalling postgres link to postgis" >> ${setupLogFile}
 apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
 echo "\n#\tInstalling geos" >> ${setupLogFile}
-apt-get -y install build-essential libxml2-dev libgeos-dev libgeos++-dev libpq-dev libbz2-dev libtool automake libproj-dev >> ${setupLogFile}
+# Note: libgeos++-dev is included here too (the nominatim install page suggests installing it if there is a problem with the 'pear install DB' below - it seems safe to install it anyway)
+apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev libgeos++-dev >> ${setupLogFile}
 
 # Add Protobuf support
 echo "\n#\tInstalling protobuf" >> ${setupLogFile}
