@@ -82,7 +82,7 @@ apt-get -y install apache2 php5 >> ${setupLogFile}
 
 # Install Postgres, PostGIS and dependencies
 echo "\n#\tInstalling postgres" >> ${setupLogFile}
-apt-get -y install php5-pgsql postgis postgresql php-pear gcc proj libgeos-c1 postgresql-contrib osmosis >> ${setupLogFile}
+apt-get -y install php5-pgsql postgis postgresql php-pear gcc proj-bin libgeos-c1 postgresql-contrib osmosis >> ${setupLogFile}
 echo "\n#\tInstalling postgres link to postgis" >> ${setupLogFile}
 apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
 echo "\n#\tInstalling geos" >> ${setupLogFile}
