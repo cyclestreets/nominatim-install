@@ -237,6 +237,10 @@ echo "#\tNominatim website created $(date)" >> ${setupLogFile}
 sudo -u ${username} ./utils/setup.php --osmosis-init
 echo "#\tDone setup $(date)" >> ${setupLogFile}
 
+# Enabling hierarchical updates
+sudo -u ${username} ./utils/setup.php --create-functions --enable-diff-updates
+echo "#\tDone enable hierarchical updates $(date)" >> ${setupLogFile}
+
 # Updating Nominatim
 sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
 
