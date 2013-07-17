@@ -183,7 +183,10 @@ chown ${username}:${username} ${localNominatimSettings}
 
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
+echo "#\tStarting import and index OSM data $(date)" >> ${setupLogFile}
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
+# Note: if that step gets interrupted for some reason it can be resumed using:
+# sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices
 echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
 
 # Add special phrases
