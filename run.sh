@@ -174,7 +174,7 @@ cat > ${localNominatimSettings} << EOF
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
    // Setting up the update process
    @define('CONST_Replication_Url', '${osmupdates}');
-   @define('CONST_Replication_MaxInterval', '259200');     // Process up to 3 days updates in a run
+   @define('CONST_Replication_MaxInterval', '86400');     // Process each update separately, osmosis cannot merge multiple updates
    @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
    @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
 EOF
