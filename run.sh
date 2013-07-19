@@ -40,6 +40,7 @@ osmupdates=http://download.geofabrik.de/${osmdatafolder}${osmdatacountry}-update
 # Use an absolute path for the log file to be tolerant of the changing working directory in this script
 setupLogFile=$(readlink -e $(dirname $0))/setupLog.txt
 touch ${setupLogFile}
+chmod a+w ${setupLogFile}
 echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
 echo "#\tNominatim installation $(date)" >> ${setupLogFile}
 
