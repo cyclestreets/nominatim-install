@@ -113,19 +113,25 @@ service postgresql restart
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd /home/${username}
 
-# Nominatim software
+# Get Nominatim software
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
+    echo "\n#\tInstalling Nominatim software" >> ${setupLogFile}
     sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
     cd Nominatim
-    sudo -u ${username} ./autogen.sh >> ${setupLogFile}
-    sudo -u ${username} ./configure >> ${setupLogFile}
-    sudo -u ${username} make >> ${setupLogFile}
 else
     # Update
+    echo "\n#\tUpdating Nominatim software" >> ${setupLogFile}
     cd Nominatim
-    git pull
+    sudo -u ${username} git pull >> ${setupLogFile}
 fi
+
+# Compile Nominatim software
+echo "\n#\tCompiling Nominatim software" >> ${setupLogFile}
+sudo -u ${username} ./autogen.sh >> ${setupLogFile}
+sudo -u ${username} ./configure >> ${setupLogFile}
+sudo -u ${username} make >> ${setupLogFile}
+
 
 # Get Wikipedia data which helps with name importance hinting
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
