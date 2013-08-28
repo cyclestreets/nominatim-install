@@ -99,15 +99,18 @@ set +e
 
 # PHP Pear::DB is needed for the runtime website
 # There doesn't seem an easy way to avoid this failing if it is already installed.
+echo "\n#\tInstalling pear DB" >> ${setupLogFile}
 pear install DB >> ${setupLogFile}
 
 # Bomb out if something goes wrong
 set -e
 
 # Tuning PostgreSQL
+echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
 ./configPostgresql.sh oltp n
 
 # Restart postgres assume the new config
+echo "\n#\tRestarting PostgreSQL" >> ${setupLogFile}
 service postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
@@ -134,6 +137,7 @@ sudo -u ${username} make >> ${setupLogFile}
 
 
 # Get Wikipedia data which helps with name importance hinting
+echo "\n#\tWikipedia data" >> ${setupLogFile}
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
 # Download them if they are not already present - the available ones date from early 2012.
 if test ! -r data/wikipedia_article.sql.bin; then
@@ -145,13 +149,16 @@ fi
 
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
+echo "\n#\tCreating the importer account" >> ${setupLogFile}
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${username}'" | grep -q 1 || sudo -u postgres createuser -s $username
 
 # Create website user in Postgres
+echo "\n#\tCreating website user" >> ${setupLogFile}
 websiteUser=www-data
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${websiteUser}'" | grep -q 1 || sudo -u postgres createuser -SDR ${websiteUser}
 
 # Nominatim module reading permissions
+echo "\n#\tNominatim module reading permissions" >> ${setupLogFile}
 chmod +x "/home/${username}"
 chmod +x "/home/${username}/Nominatim"
 chmod +x "/home/${username}/Nominatim/module"
@@ -161,12 +168,14 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data (if more than a day old)
 if test ! -r data/${osmdatafolder}${osmdatafilename} || ! test `find data/${osmdatafolder}${osmdatafilename} -mtime -1`; then
+    echo "\n#\tDownload OSM data" >> ${setupLogFile}
     sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
 fi
 
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
 # Remove any pre-existing nominatim database
+echo "\n#\tRemove any pre-existing nominatim database" >> ${setupLogFile}
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Add local Nominatim settings
