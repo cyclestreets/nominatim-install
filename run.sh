@@ -127,6 +127,8 @@ else
     echo "\n#\tUpdating Nominatim software" >> ${setupLogFile}
     cd Nominatim
     sudo -u ${username} git pull >> ${setupLogFile}
+    # Some of the schema is created by osm2pgsql which is updated by:
+    sudo -u ${username} git submodule update >> ${setupLogFile}
 fi
 
 # Compile Nominatim software
