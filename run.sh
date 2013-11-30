@@ -115,7 +115,8 @@ set -e
 
 # Tuning PostgreSQL
 echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
-./configPostgresql.sh oltp n
+# Use 'data warehousing' option
+./configPostgresql.sh dw n
 
 # Restart postgres assume the new config
 echo "\n#\tRestarting PostgreSQL" >> ${setupLogFile}
