@@ -2,6 +2,7 @@
 # Script to install Nominatim on Ubuntu
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
+# Synced with: Latest revision as of 08:51, 15 November 2013
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
@@ -75,20 +76,27 @@ fi
 apt-get update > /dev/null
 
 # Install basic software
-apt-get -y install wget git >> ${setupLogFile}
+apt-get -y install wget >> ${setupLogFile}
 
-# Install Apache, PHP
-echo "\n#\tInstalling Apache, PHP" >> ${setupLogFile}
-apt-get -y install apache2 php5 >> ${setupLogFile}
 
-# Install Postgres, PostGIS and dependencies
-echo "\n#\tInstalling postgres" >> ${setupLogFile}
-apt-get -y install php5-pgsql postgis postgresql php-pear gcc proj-bin libgeos-c1 postgresql-contrib osmosis >> ${setupLogFile}
-echo "\n#\tInstalling postgres link to postgis" >> ${setupLogFile}
-apt-get -y install postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
-echo "\n#\tInstalling geos" >> ${setupLogFile}
+# Install software
+echo "\n#\tInstalling software packages" >> ${setupLogFile}
 # Note: libgeos++-dev is included here too (the nominatim install page suggests installing it if there is a problem with the 'pear install DB' below - it seems safe to install it anyway)
 apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev libgeos++-dev >> ${setupLogFile}
+apt-get -y install gcc proj-bin libgeos-c1 git osmosis >> ${setupLogFile}
+apt-get -y install php5 php-pear php5-pgsql php5-json >> ${setupLogFile}
+
+# Install Postgres, PostGIS and dependencies
+echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
+
+# Install Apache
+echo "\n#\tInstalling Apache" >> ${setupLogFile}
+apt-get -y install apache2 >> ${setupLogFile}
+
+# Install gdal - which is apparently used for US data (more steps need to be added to this script to support that US data)
+echo "\n#\tInstalling gdal" >> ${setupLogFile}
+apt-get -y install python-gdal >> ${setupLogFile}
 
 # Add Protobuf support
 echo "\n#\tInstalling protobuf" >> ${setupLogFile}
@@ -128,7 +136,7 @@ else
     cd Nominatim
     sudo -u ${username} git pull >> ${setupLogFile}
     # Some of the schema is created by osm2pgsql which is updated by:
-    sudo -u ${username} git submodule update >> ${setupLogFile}
+    sudo -u ${username} git submodule update --init >> ${setupLogFile}
 fi
 
 # Compile Nominatim software
