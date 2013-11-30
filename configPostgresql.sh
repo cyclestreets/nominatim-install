@@ -260,6 +260,7 @@ SYNCHRONOUS_COMMIT=off
 CHECKPOINT_SEG=100
 CHECKPOINT_TIMEOUT=10min
 CHECKPOINT_COMPLETION_TARGET=0.9
+# For the initial import - switch them on again afterwards or you risk database corruption
 FSYNC=off
 FULL_PAGE_WRITES=off
 
@@ -283,8 +284,8 @@ if [ -e $CONFIG_FILE ]; then
 	echo "#\tApplying the edits to ${TEMP_FILE}";
 	sed \
 -e "s/[#]*shared_buffers = .*/shared_buffers = $SHARED_BUFFERS/" \
--e "s/[#]*maintenance_work_mem = .*/maintenance_work_mem = $MAINT_WORK_MEM/" \
 -e "s/[#]*work_mem = .*/work_mem = $WORK_MEM/" \
+-e "s/[#]*maintenance_work_mem = .*/maintenance_work_mem = $MAINT_WORK_MEM/" \
 -e "s/[#]*effective_cache_size = .*/effective_cache_size = $EFFECTIVE_CACHE_SIZE/" \
 -e "s/[#]*synchronous_commit = .*/synchronous_commit = $SYNCHRONOUS_COMMIT/" \
 -e "s/[#]*checkpoint_segments = .*/checkpoint_segments = $CHECKPOINT_SEG/" \
