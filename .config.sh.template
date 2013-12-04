@@ -17,8 +17,8 @@ password=
 
 # Default cache
 osm2pgsqlcache=
-# Small cache - needed on test machine
-#osm2pgsqlcache="--osm2pgsql-cache 250"
+# 18GB is recommended for full planet import (arg value is in MB)
+#osm2pgsqlcache="--osm2pgsql-cache 18000"
 
 ### SETTINGS ###
 
