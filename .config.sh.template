@@ -21,6 +21,15 @@ osm2pgsqlcache=
 #osm2pgsqlcache="--osm2pgsql-cache 18000"
 
 ### SETTINGS ###
+# Define either a full planet, or an extract by commenting in the relevant sections
+
+# Full Planet
+#planetUrl=http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/pbf/
+
+# Geofabrik Extract
+# If planetUrl is an empty string that tells the install script to configure for Geofabrik extract
+#planetUrl=
+#geofabrikUrl=http://download.geofabrik.de/
 
 # Define the location of the .pdf OSM data file
 # Several option groups here, comment in / out as necessary
@@ -35,6 +44,6 @@ osm2pgsqlcache=
 #osmdatacountry=iceland
 ## Europe
 # On a machine with 64GB ram and four processors takes 2.5 days to complete the initial install Oct 2012.
-osmdatafolder=
-osmdatacountry=europe
+#osmdatafolder=
+#osmdatacountry=europe
 

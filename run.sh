@@ -30,10 +30,39 @@ fi
 # Load the credentials
 . ./${configFile}
 
-# Download url
-osmdatafilename=${osmdatacountry}-latest.osm.pbf
-osmdataurl=http://download.geofabrik.de/${osmdatafolder}${osmdatafilename}
-osmupdates=http://download.geofabrik.de/${osmdatafolder}${osmdatacountry}-updates
+# Check either planet or extract selected
+if [ -z "${planetUrl}" -a -z "${geofabrikUrl}" ]; then
+    # Report and fail
+    echo "#	Configuration error, please specify either a full planet or a Geofabrik extract"
+    exit 1
+fi
+
+# Check either planet or extract selected but not both
+if [ -n "${planetUrl}" -a -n "${geofabrikUrl}" ]; then
+    # Report and fail
+    echo "#	Configuration error, please specify either a full planet or a Geofabrik extract, not both"
+    echo "#	Planet: ${planetUrl}"
+    echo "#	Extract: ${geofabrikUrl}"
+    exit 1
+fi
+
+# Download
+if [ -n "${planetUrl}" ]; then
+
+    # Options for a full planet
+    osmdatafilename=planet-latest.osm.pbf
+    osmdatafolder=wholePlanet
+    osmdataurl=${planetUrl}${osmdatafilename}
+
+else
+    # Options for a Geofabrik Extract
+    osmdataurl=${geofabrikUrl}${osmdatafolder}${osmdatafilename}
+    osmupdates=${geofabrikUrl}${osmdatafolder}${osmdatacountry}-updates
+fi
+
+# Where the downloaded data is stored
+osmdatapath=data/${osmdatafolder}${osmdatafilename}
+
 
 ### MAIN PROGRAM ###
 
@@ -178,9 +207,10 @@ chmod +x "/home/${username}/Nominatim/module"
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data (if more than a day old)
-if test ! -r data/${osmdatafolder}${osmdatafilename} || ! test `find data/${osmdatafolder}${osmdatafilename} -mtime -1`; then
+if test ! -r ${osmdatapath} || ! test `find ${osmdatapath} -mtime -1`; then
     echo "\n#\tDownload OSM data" >> ${setupLogFile}
-    sudo -u ${username} wget --output-document=data/${osmdatafolder}${osmdatafilename} ${osmdataurl}
+    sudo -u ${username} wget --output-document=${osmdatapath}.md5 ${osmdataurl}.md5
+    sudo -u ${username} wget --output-document=${osmdatapath} ${osmdataurl}
 fi
 
 #idempotent
@@ -190,7 +220,7 @@ echo "\n#\tRemove any pre-existing nominatim database" >> ${setupLogFile}
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Add local Nominatim settings
-localNominatimSettings=/home/nominatim/Nominatim/settings/local.php
+localNominatimSettings=/home/${username}/Nominatim/settings/local.php
 
 cat > ${localNominatimSettings} << EOF
 <?php
@@ -198,12 +228,20 @@ cat > ${localNominatimSettings} << EOF
    @define('CONST_Postgresql_Version', '9.1');
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
+EOF
+
+# By default, Nominatim is configured to update using the global minutely diffs
+if [ -z "${planetUrl}" ]; then
+
+    # When using GeoFabrik extracts append these lines to set up the update process
+    cat >> ${localNominatimSettings} << EOF
    // Setting up the update process
    @define('CONST_Replication_Url', '${osmupdates}');
    @define('CONST_Replication_MaxInterval', '86400');     // Process each update separately, osmosis cannot merge multiple updates
    @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
    @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
 EOF
+fi
 
 # Change settings file to Nominatim ownership
 chown ${username}:${username} ${localNominatimSettings}
@@ -211,9 +249,10 @@ chown ${username}:${username} ${localNominatimSettings}
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
 echo "#\tStarting import and index OSM data $(date)" >> ${setupLogFile}
-sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/data/${osmdatafolder}${osmdatafilename} --all >> ${setupLogFile}
+sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all >> ${setupLogFile}
 # Note: if that step gets interrupted for some reason it can be resumed using:
 # (Threads argument is optional, it'll default to one less than number of available cpus.)
+# If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
 # sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices --threads 2
 echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
 
