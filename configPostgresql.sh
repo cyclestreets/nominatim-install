@@ -45,13 +45,14 @@ fi
 
 # Check if the 'usage' parameter has been supplied
 if [ -z "$1" ]; then
-	echo "Usage:  ./configPG.sh [template]"
-	echo "Where [template] is one of:"
-	echo "	'web'  (web backend server)"
-	echo "	'oltp' (online transaction processing)"
-	echo "	'dw'   (data warehouse)"
-	echo "See http://www.slideshare.net/oscon2007/performance-whack-a-mole"
-	echo "for further explanation."
+	echo "#	Usage:  ./configPostgresql.sh [template] [dedicated] [override_maintenance_work_mem]"
+	echo "#	Where [template] is one of:"
+	echo "#		'web'  (web backend server)"
+	echo "#		'oltp' (online transaction processing)"
+	echo "#		'dw'   (data warehouse)"
+	echo "#		See http://www.slideshare.net/oscon2007/performance-whack-a-mole for further explanation."
+	echo "#	and [dedicated] is y/n depending on whether PostgreSQL is the only active service (defaults to n)"
+	echo "#	and [override_maintenance_work_mem] is eg 16GB overrides the maint_work_mem (leave blank to assume a default)"
 	exit
 fi
 
@@ -63,7 +64,11 @@ else
     dedicated=$2
 fi
 
-echo "#\tConfiguring as usage type: $1, Dedicated PostgreSQL server: ${dedicated}"
+
+# Bind the 'override_maintenance_work_mem' parameter
+override_maintenance_work_mem=$3
+
+echo "#\tConfiguring as usage type: $1, Dedicated PostgreSQL server: ${dedicated}, override_maintenance_work_mem: ${override_maintenance_work_mem}"
 
 ###################################
 ### USER CONFIGURABLE VARIABLES ###
@@ -255,7 +260,9 @@ WAL_BUFFERS="16MB"
 EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM_MB * $EFFECTIVE_CACHE_RATIO" | bc -l | cut -d'.' -f1)MB
 
 # Hard values based on: http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Tuning_PostgreSQL
-MAINT_WORK_MEM=16GB
+if [ -n "${override_maintenance_work_mem}" ]; then
+    MAINT_WORK_MEM=${override_maintenance_work_mem}
+fi
 SYNCHRONOUS_COMMIT=off
 CHECKPOINT_SEG=100
 CHECKPOINT_TIMEOUT=10min

@@ -1,15 +1,15 @@
 #!/bin/sh
 # Contains credentials
-# This is a template file, save as simply .config.sh and set your own values below.
+# This is a template file, save as simply .config.sh (amd make executable) and set your own values below.
 
 # Define the website hostname and e-mail for the VirtualHost
 # Several option groups here, comment in / out as necessary
 # Localhost
-#websiteurl=nominatim.localhost
-#emailcontact=nominatim@localhost
+websiteurl=nominatim.localhost
+emailcontact=nominatim@localhost
 # CycleStreets
-websiteurl=nominatim.cyclestreets.net
-emailcontact=webmasterATcyclestreets.net
+#websiteurl=nominatim.cyclestreets.net
+#emailcontact=webmasterATcyclestreets.net
 
 # Define the username for Nominatim to install/run under, so that it can run independent of any individual personal account on the machine
 username=nominatim
