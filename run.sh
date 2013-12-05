@@ -144,8 +144,7 @@ set -e
 
 # Tuning PostgreSQL
 echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
-# Use 'data warehousing' option
-./configPostgresql.sh dw n
+./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 
 # Restart postgres assume the new config
 echo "\n#\tRestarting PostgreSQL" >> ${setupLogFile}

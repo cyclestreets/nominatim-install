@@ -15,27 +15,31 @@ emailcontact=nominatim@localhost
 username=nominatim
 password=
 
-# Default cache
-osm2pgsqlcache=
-# 18GB is recommended for full planet import (arg value is in MB)
-#osm2pgsqlcache="--osm2pgsql-cache 18000"
-
 ### SETTINGS ###
 # Define either a full planet, or an extract by commenting in the relevant sections
 
 # Full Planet
 #planetUrl=http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/pbf/
+#postgresconfigmode=dw
+#override_maintenance_work_mem=16GB
+# 18GB is recommended for full planet import (arg value is in MB)
+#osm2pgsqlcache="--osm2pgsql-cache 18000"
 
 # Geofabrik Extract
 # If planetUrl is an empty string that tells the install script to configure for Geofabrik extract
-#planetUrl=
-#geofabrikUrl=http://download.geofabrik.de/
+planetUrl=
+geofabrikUrl=http://download.geofabrik.de/
+postgresconfigmode=oltp
+override_maintenance_work_mem=
+# Default cache
+osm2pgsqlcache=
+
 
 # Define the location of the .pdf OSM data file
 # Several option groups here, comment in / out as necessary
 # Andorra (install, without wikipedia data, takes 12 minutes)
-#osmdatafolder=europe/
-#osmdatacountry=andorra
+osmdatafolder=europe/
+osmdatacountry=andorra
 ## British Isles
 #osmdatafolder=europe/
 #osmdatacountry=british-isles
