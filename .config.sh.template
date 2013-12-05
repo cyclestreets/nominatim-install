@@ -15,6 +15,9 @@ emailcontact=nominatim@localhost
 username=nominatim
 password=
 
+# Apache virtual host configuration file name
+nominatimVHfile=400-nominatim
+
 ### SETTINGS ###
 # Define either a full planet, or an extract by commenting in the relevant sections
 

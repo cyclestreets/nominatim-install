@@ -279,7 +279,7 @@ EOF
 
 # Create a VirtalHost for Apache
 echo "\n#\tCreate a VirtalHost for Apache" >> ${setupLogFile}
-cat > /etc/apache2/sites-available/nominatim.conf << EOF
+cat > /etc/apache2/sites-available/${nominatimVHfile}.conf << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
         ServerAdmin ${emailcontact}
@@ -298,7 +298,7 @@ cat > /etc/apache2/sites-available/nominatim.conf << EOF
 EOF
 
 # Enable the VirtualHost and restart Apache
-a2ensite nominatim
+a2ensite ${nominatimVHfile}
 service apache2 reload
 
 echo "#\tNominatim website created $(date)" >> ${setupLogFile}
