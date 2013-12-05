@@ -279,7 +279,7 @@ EOF
 
 # Create a VirtalHost for Apache
 echo "\n#\tCreate a VirtalHost for Apache" >> ${setupLogFile}
-cat > /etc/apache2/sites-available/nominatim << EOF
+cat > /etc/apache2/sites-available/nominatim.conf << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
         ServerAdmin ${emailcontact}
