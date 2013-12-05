@@ -51,7 +51,7 @@ if [ -n "${planetUrl}" ]; then
 
     # Options for a full planet
     osmdatafilename=planet-latest.osm.pbf
-    osmdatafolder=wholePlanet
+    osmdatafolder=wholePlanet/
     osmdataurl=${planetUrl}${osmdatafilename}
 
 else
