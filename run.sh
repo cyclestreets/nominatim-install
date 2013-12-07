@@ -56,6 +56,7 @@ if [ -n "${planetUrl}" ]; then
 
 else
     # Options for a Geofabrik Extract
+    osmdatafilename=${osmdatacountry}-latest.osm.pbf
     osmdataurl=${geofabrikUrl}${osmdatafolder}${osmdatafilename}
     osmupdates=${geofabrikUrl}${osmdatafolder}${osmdatacountry}-updates
 fi
