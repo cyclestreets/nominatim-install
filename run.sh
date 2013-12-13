@@ -277,8 +277,8 @@ User-agent: *
 Disallow: /
 EOF
 
-# Create a VirtalHost for Apache
-echo "\n#\tCreate a VirtalHost for Apache" >> ${setupLogFile}
+# Create a VirtualHost for Apache
+echo "\n#\tCreate a VirtualHost for Apache" >> ${setupLogFile}
 cat > /etc/apache2/sites-available/${nominatimVHfile}.conf << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
