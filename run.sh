@@ -149,7 +149,7 @@ echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
 
 # Restart postgres assume the new config
 echo "\n#\tRestarting PostgreSQL" >> ${setupLogFile}
-service postgresql restart
+/etc/init.d/postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd /home/${username}
@@ -300,7 +300,7 @@ EOF
 
 # Enable the VirtualHost and restart Apache
 a2ensite ${nominatimVHfile}
-service apache2 reload
+/etc/init.d/apache2 reload
 
 echo "#\tNominatim website created $(date)" >> ${setupLogFile}
 
