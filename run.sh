@@ -116,6 +116,10 @@ apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev 
 apt-get -y install gcc proj-bin libgeos-c1 git osmosis >> ${setupLogFile}
 apt-get -y install php5 php-pear php5-pgsql php5-json >> ${setupLogFile}
 
+# Some additional packages that may not already be installed
+# bc is needed in configPostgresql.sh
+apt-get -y install bc >> ${setupLogFile}
+
 # Install Postgres, PostGIS and dependencies
 echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
 apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
