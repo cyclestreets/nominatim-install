@@ -14,6 +14,9 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# Bind current directory
+nomInstalDir=$(pwd)
+
 # Bomb out if something goes wrong
 set -e
 
@@ -315,6 +318,14 @@ echo "#\tDone setup $(date)" >> ${setupLogFile}
 # Enabling hierarchical updates
 sudo -u ${username} ./utils/setup.php --create-functions --enable-diff-updates
 echo "#\tDone enable hierarchical updates $(date)" >> ${setupLogFile}
+
+# Adust PostgreSQL to do disk writes
+echo "\n#\tRetuning PostgreSQL for disk writes" >> ${setupLogFile}
+${nomInstalDir}/configPostgresqlDiskWrites.sh
+
+# Reload postgres assume the new config
+echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
+/etc/init.d/postgresql reload
 
 # Updating Nominatim
 sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
