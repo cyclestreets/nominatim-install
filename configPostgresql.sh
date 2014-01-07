@@ -80,6 +80,7 @@ PGver=9.1
 # These variables are for Debian...be sure to alter them if your OS is different!
 PGHOMEDIR=/var/lib/postgresql
 PGDATADIR=$PGHOMEDIR/$PGver/main
+# Need to sync these with configPostgresqlDiskWrites.sh
 CONFIG_FILE=/etc/postgresql/$PGver/main/postgresql.conf
 TEMP_FILE=${CONFIG_FILE}.TMP 
 
