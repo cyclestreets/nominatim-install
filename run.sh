@@ -312,6 +312,7 @@ a2ensite ${nominatimVHfile}
 echo "#\tNominatim website created $(date)" >> ${setupLogFile}
 
 # Setting up the update process
+rm -f /home/${username}/Nominatim/settings/configuration.txt
 sudo -u ${username} ./utils/setup.php --osmosis-init
 echo "#\tDone setup $(date)" >> ${setupLogFile}
 
