@@ -329,6 +329,9 @@ echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
 /etc/init.d/postgresql reload
 
 # Updating Nominatim
+# Using two threads for the upadate will help performance, by adding this option: --index-instances 2
+# Going much beyond two threads is not really worth it because the threads interfere with each other quite a bit.
+#  If your system is live and serving queries, keep an eye on response times at busy times, because too many update threads might interfere there, too.
 sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
 
 # Done
