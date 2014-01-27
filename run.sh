@@ -2,7 +2,7 @@
 # Script to install Nominatim on Ubuntu
 # Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
-# Synced with: Latest revision as of 08:51, 15 November 2013
+# Synced with: Latest revision as of 18:41, 22 January 2014
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
@@ -264,7 +264,8 @@ chown ${username}:${username} ${localNominatimSettings}
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
 echo "#\tStarting import and index OSM data $(date)" >> ${setupLogFile}
-sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all >> ${setupLogFile}
+# Experimentally trying with two threads here
+sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 >> ${setupLogFile}
 # Note: if that step gets interrupted for some reason it can be resumed using:
 # (Threads argument is optional, it'll default to one less than number of available cpus.)
 # If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
