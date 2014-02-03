@@ -213,8 +213,8 @@ chmod +x "/home/${username}/Nominatim/module"
 # Ensure download folder exists
 sudo -u ${username} mkdir -p data/${osmdatafolder}
 
-# Download OSM data (if more than a day old)
-if test ! -r ${osmdatapath} || ! test `find ${osmdatapath} -mtime -1`; then
+# Download OSM data if not already present
+if test ! -r ${osmdatapath}; then
     echo "\n#\tDownload OSM data" >> ${setupLogFile}
     sudo -u ${username} wget --output-document=${osmdatapath}.md5 ${osmdataurl}.md5
     sudo -u ${username} wget --output-document=${osmdatapath} ${osmdataurl}
