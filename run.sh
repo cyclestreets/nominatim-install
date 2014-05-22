@@ -165,7 +165,7 @@ eval cd /home/${username}
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
     echo "\n#\tInstalling Nominatim software" >> ${setupLogFile}
-    sudo -u ${username} git clone --recursive git://github.com/twain47/Nominatim.git >> ${setupLogFile}
+    sudo -u ${username} git clone --recursive https://github.com/twain47/Nominatim.git >> ${setupLogFile}
     cd Nominatim
 else
     # Update
