@@ -1,6 +1,6 @@
 Bash script to install Nominatim on Ubuntu
 
-Tested on 12.04 using Postgres 9.1
+Tested on 14.04 using Postgres 9.3
 
 http://wiki.openstreetmap.org/wiki/Nominatim/Installation
 

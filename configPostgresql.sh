@@ -75,7 +75,7 @@ echo "#\tConfiguring as usage type: $1, Dedicated PostgreSQL server: ${dedicated
 ################################### 
 
 # Postgres version
-PGver=9.1
+PGver=9.3
 
 # These variables are for Debian...be sure to alter them if your OS is different!
 PGHOMEDIR=/var/lib/postgresql
