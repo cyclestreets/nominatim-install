@@ -3,14 +3,14 @@
 ############################################################
 
 # Set the base image to Ubuntu
-FROM ubuntu:12.04
+FROM ubuntu:14.04
 
 # File Author / Maintainer
 MAINTAINER Melvin Zhang
 
 # Set locale
-RUN locale-gen --no-purge en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+RUN locale-gen en_US.UTF-8
+RUN update-locale LANG=en_US.UTF-8
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
@@ -28,7 +28,7 @@ RUN apt-get -y install php5 php-pear php5-pgsql php5-json
 RUN apt-get -y install bc 
 
 # Install Postgres, PostGIS and dependencies
-RUN apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1
+RUN apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 
 # Install Apache
 RUN apt-get -y install apache2

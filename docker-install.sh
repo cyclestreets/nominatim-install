@@ -1,12 +1,12 @@
 #!/bin/sh
-# Script to install Nominatim on Ubuntu:12.04 in Docker based on run.sh
+# Script to install Nominatim on Ubuntu:14.04 in Docker based on run.sh
 # Changes:
 # * setupLogFile is /dev/stdout
 # * disable configPostgresql.sh as it uses sysctl
 # * disable downloading of wikipedia sql files
 # * disable updating Nominatim
 
-# Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
+# Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 # Synced with: Latest revision as of 18:41, 22 January 2014
 
@@ -132,7 +132,7 @@ apt-get -y install bc >> ${setupLogFile}
 
 # Install Postgres, PostGIS and dependencies
 echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3 >> ${setupLogFile}
 
 # Install Apache
 echo "\n#\tInstalling Apache" >> ${setupLogFile}
@@ -249,7 +249,8 @@ localNominatimSettings=/home/${username}/Nominatim/settings/local.php
 cat > ${localNominatimSettings} << EOF
 <?php
    // Paths
-   @define('CONST_Postgresql_Version', '9.1');
+   @define('CONST_Postgresql_Version', '9.3');
+   @define('CONST_Postgis_Version', '2.1');
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
@@ -325,7 +326,7 @@ EOF
 
 # Enable the VirtualHost and restart Apache
 a2ensite ${nominatimVHfile}
-/etc/init.d/apache2 reload
+#/etc/init.d/apache2 reload
 
 echo "#\tNominatim website created $(date)" >> ${setupLogFile}
 
@@ -344,7 +345,7 @@ ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
 echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
-/etc/init.d/postgresql reload
+#/etc/init.d/postgresql reload
 
 # Updating Nominatim
 # Using two threads for the upadate will help performance, by adding this option: --index-instances 2
