@@ -42,7 +42,7 @@ RUN apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 # Copy the application folder inside the container
 ADD . /nominatim
 
-RUN cd /nominatim; ./docker-install.sh
+RUN cd /nominatim; ./run.sh
 
 # Set the default directory where CMD will execute
 WORKDIR /nominatim
