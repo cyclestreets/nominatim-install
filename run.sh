@@ -326,7 +326,7 @@ EOF
 # Enable the VirtualHost and restart Apache
 a2ensite ${nominatimVHfile}
 # skip if doing a Docker install
-if [ -z "${dockerInstall}"]; then
+if [ -z "${dockerInstall}" ]; then
     /etc/init.d/apache2 reload
 fi
 
