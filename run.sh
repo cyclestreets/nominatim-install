@@ -114,7 +114,7 @@ fi
 apt-get update > /dev/null
 
 # Install basic software
-apt-get -y install wget >> ${setupLogFile}
+apt-get -y install sudo wget >> ${setupLogFile}
 
 
 # Install software
@@ -155,9 +155,9 @@ pear install DB >> ${setupLogFile}
 # Bomb out if something goes wrong
 set -e
 
-# Tuning PostgreSQL
 # skip if doing a Docker install as kernel parameters cannot be modified
 if [ -z "${dockerInstall}" ]; then
+    # Tuning PostgreSQL
     echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
     ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 fi
