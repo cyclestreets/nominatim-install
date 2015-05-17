@@ -3,7 +3,7 @@
 # It changes the postgresql configuration to write changes to disk.
 
 # Need to sync these with configPostgresql.sh
-PGver=9.1
+PGver=9.3
 CONFIG_FILE=/etc/postgresql/$PGver/main/postgresql.conf
 TEMP_FILE=${CONFIG_FILE}.TMP 
 

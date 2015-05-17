@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script to install Nominatim on Ubuntu
-# Tested on 12.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.1
+# Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 # Synced with: Latest revision as of 18:41, 22 January 2014
 
@@ -12,6 +12,11 @@ echo "#\tNominatim installation $(date)"
 if [ "$(id -u)" != "0" ]; then
     echo "#\tThis script must be run as root." 1>&2
     exit 1
+fi
+
+# Check if we are running in a Docker container
+if grep --quiet docker /proc/1/cgroup; then
+    dockerInstall=1
 fi
 
 # Bind current directory
@@ -101,7 +106,7 @@ fi
 apt-get update
 
 # Install basic software
-apt-get -y install wget >> ${setupLogFile}
+apt-get -y install sudo wget >> ${setupLogFile}
 
 
 # Install software
@@ -117,7 +122,7 @@ apt-get -y install bc
 
 # Install Postgres, PostGIS and dependencies
 echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3 >> ${setupLogFile}
 
 # Install Apache
 echo "\n#\tInstalling Apache"
@@ -142,9 +147,12 @@ pear install DB
 # Bomb out if something goes wrong
 set -e
 
-# Tuning PostgreSQL
-echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
-./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
+# skip if doing a Docker install as kernel parameters cannot be modified
+if [ -z "${dockerInstall}" ]; then
+    # Tuning PostgreSQL
+    echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
+    ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
+fi
 
 # Restart postgres assume the new config
 echo "\n#\tRestarting PostgreSQL"
@@ -232,7 +240,8 @@ localNominatimSettings=/home/${username}/Nominatim/settings/local.php
 cat > ${localNominatimSettings} << EOF
 <?php
    // Paths
-   @define('CONST_Postgresql_Version', '9.1');
+   @define('CONST_Postgresql_Version', '9.3');
+   @define('CONST_Postgis_Version', '2.1');
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
@@ -308,7 +317,10 @@ EOF
 
 # Enable the VirtualHost and restart Apache
 a2ensite ${nominatimVHfile}
-/etc/init.d/apache2 reload
+# skip if doing a Docker install
+if [ -z "${dockerInstall}" ]; then
+    /etc/init.d/apache2 reload
+fi
 
 echo "#\tNominatim website created $(date)"
 
@@ -327,13 +339,19 @@ ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
 echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
-/etc/init.d/postgresql reload
+# skip if doing a Docker install
+if [ -z "${dockerInstall}" ]; then
+    /etc/init.d/postgresql reload
+fi
 
 # Updating Nominatim
 # Using two threads for the upadate will help performance, by adding this option: --index-instances 2
 # Going much beyond two threads is not really worth it because the threads interfere with each other quite a bit.
 #  If your system is live and serving queries, keep an eye on response times at busy times, because too many update threads might interfere there, too.
-sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
+# skip if doing a Docker install
+if [ -z "${dockerInstall}" ]; then
+    sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
+fi
 
 # Done
 echo "#\tNominatim installation completed $(date)"
