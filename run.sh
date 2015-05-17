@@ -101,8 +101,7 @@ fi
 apt-get update
 
 # Install basic software
-apt-get -y install sudo
-apt-get -y install wget
+apt-get -y install wget >> ${setupLogFile}
 
 
 # Install software
@@ -117,8 +116,8 @@ apt-get -y install php5 php-pear php5-pgsql php5-json
 apt-get -y install bc
 
 # Install Postgres, PostGIS and dependencies
-echo "\n#\tInstalling postgres and link to postgis"
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1
+echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
 
 # Install Apache
 echo "\n#\tInstalling Apache"
@@ -144,7 +143,7 @@ pear install DB
 set -e
 
 # Tuning PostgreSQL
-echo "\n#\tTuning PostgreSQL"
+echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
 ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 
 # Restart postgres assume the new config
@@ -327,7 +326,7 @@ echo "\n#\tRetuning PostgreSQL for disk writes"
 ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
-echo "\n#\tReloading PostgreSQL"
+echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
 /etc/init.d/postgresql reload
 
 # Updating Nominatim
