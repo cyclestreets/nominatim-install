@@ -70,14 +70,6 @@ osmdatapath=data/${osmdatafolder}${osmdatafilename}
 
 ### MAIN PROGRAM ###
 
-# Logging
-# Use an absolute path for the log file to be tolerant of the changing working directory in this script
-setupLogFile=$(readlink -e $(dirname $0))/setupLog.txt
-touch ${setupLogFile}
-chmod a+w ${setupLogFile}
-echo "#\tImport and index OSM data in progress, follow log file with:\n#\ttail -f ${setupLogFile}"
-echo "#\tNominatim installation $(date)" >> ${setupLogFile}
-
 # Ensure there is a nominatim user account
 if id -u ${username} >/dev/null 2>&1; then
     echo "#	User ${username} exists already and will be used."
@@ -102,60 +94,60 @@ else
 
     # Create the nominatim user
     useradd -m -p $password $username
-    echo "#\tNominatim user ${username} created" >> ${setupLogFile}
+    echo "#\tNominatim user ${username} created"
 fi
 
 # Prepare the apt index; it may be practically non-existent on a fresh VM
 apt-get update > /dev/null
 
 # Install basic software
-apt-get -y install wget >> ${setupLogFile}
+apt-get -y install wget
 
 
 # Install software
-echo "\n#\tInstalling software packages" >> ${setupLogFile}
+echo "\n#\tInstalling software packages"
 # Note: libgeos++-dev is included here too (the nominatim install page suggests installing it if there is a problem with the 'pear install DB' below - it seems safe to install it anyway)
-apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev libgeos++-dev >> ${setupLogFile}
-apt-get -y install gcc proj-bin libgeos-c1 git osmosis >> ${setupLogFile}
-apt-get -y install php5 php-pear php5-pgsql php5-json >> ${setupLogFile}
+apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev libgeos++-dev
+apt-get -y install gcc proj-bin libgeos-c1 git osmosis
+apt-get -y install php5 php-pear php5-pgsql php5-json
 
 # Some additional packages that may not already be installed
 # bc is needed in configPostgresql.sh
-apt-get -y install bc >> ${setupLogFile}
+apt-get -y install bc
 
 # Install Postgres, PostGIS and dependencies
-echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1 >> ${setupLogFile}
+echo "\n#\tInstalling postgres and link to postgis"
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis postgresql-server-dev-9.1
 
 # Install Apache
-echo "\n#\tInstalling Apache" >> ${setupLogFile}
-apt-get -y install apache2 >> ${setupLogFile}
+echo "\n#\tInstalling Apache"
+apt-get -y install apache2
 
 # Install gdal - which is apparently used for US data (more steps need to be added to this script to support that US data)
-echo "\n#\tInstalling gdal" >> ${setupLogFile}
-apt-get -y install python-gdal >> ${setupLogFile}
+echo "\n#\tInstalling gdal"
+apt-get -y install python-gdal
 
 # Add Protobuf support
-echo "\n#\tInstalling protobuf" >> ${setupLogFile}
-apt-get -y install libprotobuf-c0-dev protobuf-c-compiler >> ${setupLogFile}
+echo "\n#\tInstalling protobuf"
+apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 
 # Temporarily allow commands to fail without exiting the script
 set +e
 
 # PHP Pear::DB is needed for the runtime website
 # There doesn't seem an easy way to avoid this failing if it is already installed.
-echo "\n#\tInstalling pear DB" >> ${setupLogFile}
-pear install DB >> ${setupLogFile}
+echo "\n#\tInstalling pear DB"
+pear install DB
 
 # Bomb out if something goes wrong
 set -e
 
 # Tuning PostgreSQL
-echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
+echo "\n#\tTuning PostgreSQL"
 ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 
 # Restart postgres assume the new config
-echo "\n#\tRestarting PostgreSQL" >> ${setupLogFile}
+echo "\n#\tRestarting PostgreSQL"
 /etc/init.d/postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
@@ -164,27 +156,27 @@ eval cd /home/${username}
 # Get Nominatim software
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
-    echo "\n#\tInstalling Nominatim software" >> ${setupLogFile}
-    sudo -u ${username} git clone --recursive https://github.com/twain47/Nominatim.git >> ${setupLogFile}
+    echo "\n#\tInstalling Nominatim software"
+    sudo -u ${username} git clone --recursive https://github.com/twain47/Nominatim.git
     cd Nominatim
 else
     # Update
-    echo "\n#\tUpdating Nominatim software" >> ${setupLogFile}
+    echo "\n#\tUpdating Nominatim software"
     cd Nominatim
-    sudo -u ${username} git pull >> ${setupLogFile}
+    sudo -u ${username} git pull
     # Some of the schema is created by osm2pgsql which is updated by:
-    sudo -u ${username} git submodule update --init >> ${setupLogFile}
+    sudo -u ${username} git submodule update --init
 fi
 
 # Compile Nominatim software
-echo "\n#\tCompiling Nominatim software" >> ${setupLogFile}
-sudo -u ${username} ./autogen.sh >> ${setupLogFile}
-sudo -u ${username} ./configure >> ${setupLogFile}
-sudo -u ${username} make >> ${setupLogFile}
+echo "\n#\tCompiling Nominatim software"
+sudo -u ${username} ./autogen.sh
+sudo -u ${username} ./configure
+sudo -u ${username} make
 
 
 # Get Wikipedia data which helps with name importance hinting
-echo "\n#\tWikipedia data" >> ${setupLogFile}
+echo "\n#\tWikipedia data"
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
 # Download them if they are not already present - the available ones date from early 2012.
 if test ! -r data/wikipedia_article.sql.bin; then
@@ -196,16 +188,16 @@ fi
 
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
-echo "\n#\tCreating the importer account" >> ${setupLogFile}
+echo "\n#\tCreating the importer account"
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${username}'" | grep -q 1 || sudo -u postgres createuser -s $username
 
 # Create website user in Postgres
-echo "\n#\tCreating website user" >> ${setupLogFile}
+echo "\n#\tCreating website user"
 websiteUser=www-data
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${websiteUser}'" | grep -q 1 || sudo -u postgres createuser -SDR ${websiteUser}
 
 # Nominatim module reading permissions
-echo "\n#\tNominatim module reading permissions" >> ${setupLogFile}
+echo "\n#\tNominatim module reading permissions"
 chmod +x "/home/${username}"
 chmod +x "/home/${username}/Nominatim"
 chmod +x "/home/${username}/Nominatim/module"
@@ -215,7 +207,7 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data if not already present
 if test ! -r ${osmdatapath}; then
-    echo "\n#\tDownload OSM data" >> ${setupLogFile}
+    echo "\n#\tDownload OSM data"
     sudo -u ${username} wget --output-document=${osmdatapath}.md5 ${osmdataurl}.md5
     sudo -u ${username} wget --output-document=${osmdatapath} ${osmdataurl}
 fi
@@ -224,14 +216,14 @@ fi
 if [ "$(md5sum ${osmdatapath} | awk '{print $1;}')" != "$(cat ${osmdatapath}.md5 | awk '{print $1;}')" ]; then
     echo "#\tThe md5 checksum for osmdatapath: ${osmdatapath} does not match, stopping."
     exit 1
-    echo "\n#\tDownloaded OSM data integrity verified by md5 check." >> ${setupLogFile}
+    echo "\n#\tDownloaded OSM data integrity verified by md5 check."
 fi
 
 
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
 # Remove any pre-existing nominatim database
-echo "\n#\tRemove any pre-existing nominatim database" >> ${setupLogFile}
+echo "\n#\tRemove any pre-existing nominatim database"
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Add local Nominatim settings
@@ -263,24 +255,24 @@ chown ${username}:${username} ${localNominatimSettings}
 
 # Import and index main OSM data
 eval cd /home/${username}/Nominatim/
-echo "#\tStarting import and index OSM data $(date)" >> ${setupLogFile}
+echo "#\tStarting import and index OSM data $(date)"
 # Experimentally trying with two threads here
-sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 >> ${setupLogFile}
+sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2
 # Note: if that step gets interrupted for some reason it can be resumed using:
 # (Threads argument is optional, it'll default to one less than number of available cpus.)
 # If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
 # sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices --threads 2
-echo "#\tDone Import and index OSM data $(date)" >> ${setupLogFile}
+echo "#\tDone Import and index OSM data $(date)"
 
 # Add special phrases
-echo "#\tStarting special phrases $(date)" >> ${setupLogFile}
-sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql >> ${setupLogFile}
-sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql >> ${setupLogFile}
+echo "#\tStarting special phrases $(date)"
+sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql
+sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql
 sudo -u ${username} rm -f specialphrases_countries.sql
-sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql >> ${setupLogFile}
-sudo -u ${username} psql -d nominatim -f specialphrases.sql >> ${setupLogFile}
+sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql
+sudo -u ${username} psql -d nominatim -f specialphrases.sql
 sudo -u ${username} rm -f specialphrases.sql
-echo "#\tDone special phrases $(date)" >> ${setupLogFile}
+echo "#\tDone special phrases $(date)"
 
 # Set up the website for use with Apache
 wwwNominatim=/var/www/nominatim
@@ -295,7 +287,7 @@ Disallow: /
 EOF
 
 # Create a VirtualHost for Apache
-echo "\n#\tCreate a VirtualHost for Apache" >> ${setupLogFile}
+echo "\n#\tCreate a VirtualHost for Apache"
 cat > /etc/apache2/sites-available/${nominatimVHfile} << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
@@ -318,23 +310,23 @@ EOF
 a2ensite ${nominatimVHfile}
 /etc/init.d/apache2 reload
 
-echo "#\tNominatim website created $(date)" >> ${setupLogFile}
+echo "#\tNominatim website created $(date)"
 
 # Setting up the update process
 rm -f /home/${username}/Nominatim/settings/configuration.txt
 sudo -u ${username} ./utils/setup.php --osmosis-init
-echo "#\tDone setup $(date)" >> ${setupLogFile}
+echo "#\tDone setup $(date)"
 
 # Enabling hierarchical updates
 sudo -u ${username} ./utils/setup.php --create-functions --enable-diff-updates
-echo "#\tDone enable hierarchical updates $(date)" >> ${setupLogFile}
+echo "#\tDone enable hierarchical updates $(date)"
 
 # Adust PostgreSQL to do disk writes
-echo "\n#\tRetuning PostgreSQL for disk writes" >> ${setupLogFile}
+echo "\n#\tRetuning PostgreSQL for disk writes"
 ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
-echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
+echo "\n#\tReloading PostgreSQL"
 /etc/init.d/postgresql reload
 
 # Updating Nominatim
@@ -344,6 +336,6 @@ echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
 sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
 
 # Done
-echo "#\tNominatim installation completed $(date)" >> ${setupLogFile}
+echo "#\tNominatim installation completed $(date)"
 
 # End of file
