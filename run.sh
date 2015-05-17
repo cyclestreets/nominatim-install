@@ -106,7 +106,8 @@ fi
 apt-get update
 
 # Install basic software
-apt-get -y install sudo wget >> ${setupLogFile}
+apt-get -y install sudo
+apt-get -y install wget
 
 
 # Install software
@@ -121,8 +122,8 @@ apt-get -y install php5 php-pear php5-pgsql php5-json
 apt-get -y install bc
 
 # Install Postgres, PostGIS and dependencies
-echo "\n#\tInstalling postgres and link to postgis" >> ${setupLogFile}
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3 >> ${setupLogFile}
+echo "\n#\tInstalling postgres and link to postgis"
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 
 # Install Apache
 echo "\n#\tInstalling Apache"
@@ -150,7 +151,7 @@ set -e
 # skip if doing a Docker install as kernel parameters cannot be modified
 if [ -z "${dockerInstall}" ]; then
     # Tuning PostgreSQL
-    echo "\n#\tTuning PostgreSQL" >> ${setupLogFile}
+    echo "\n#\tTuning PostgreSQL"
     ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 fi
 
@@ -338,7 +339,7 @@ echo "\n#\tRetuning PostgreSQL for disk writes"
 ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
-echo "\n#\tReloading PostgreSQL" >> ${setupLogFile}
+echo "\n#\tReloading PostgreSQL"
 # skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
     /etc/init.d/postgresql reload
