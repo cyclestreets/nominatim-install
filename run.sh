@@ -101,6 +101,7 @@ fi
 apt-get update
 
 # Install basic software
+apt-get -y install sudo
 apt-get -y install wget
 
 
