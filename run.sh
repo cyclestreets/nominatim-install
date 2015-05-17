@@ -98,7 +98,7 @@ else
 fi
 
 # Prepare the apt index; it may be practically non-existent on a fresh VM
-apt-get update > /dev/null
+apt-get update
 
 # Install basic software
 apt-get -y install wget
