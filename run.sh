@@ -75,6 +75,11 @@ osmdatapath=data/${osmdatafolder}${osmdatafilename}
 
 ### MAIN PROGRAM ###
 
+# Ensure the system locale is UTF-8, to avoid Postgres install failure
+echo -e 'LANG=en_GB.UTF-8\nLC_ALL=en_GB.UTF-8' > /etc/default/locale
+sudo locale-gen en_GB en_GB.UTF-8
+dpkg-reconfigure locales
+
 # Ensure there is a nominatim user account
 if id -u ${username} >/dev/null 2>&1; then
     echo "#	User ${username} exists already and will be used."
