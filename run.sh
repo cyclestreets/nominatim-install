@@ -162,6 +162,7 @@ echo "\n#\tRestarting PostgreSQL"
 eval cd /home/${username}
 
 # Get Nominatim software
+apt-get -y install git autoconf-archive
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
     echo "\n#\tInstalling Nominatim software"
