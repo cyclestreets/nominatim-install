@@ -195,6 +195,11 @@ if test ! -r data/wikipedia_redirect.sql.bin; then
     sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 fi
 
+# Add UK postcode support (centroids only, not house number level)
+if test ! -r data/gb_postcode_data.sql.gz; then
+    sudo -u ${username} wget --output-document=data/gb_postcode_data.sql.gz http://www.nominatim.org/data/gb_postcode_data.sql.gz
+fi
+
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
 echo "\n#\tCreating the importer account"
