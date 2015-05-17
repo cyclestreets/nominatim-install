@@ -2,6 +2,9 @@
 # Contains credentials
 # This is a template file, save as simply .config.sh (amd make executable) and set your own values below.
 
+# System language
+utf8Language=en_GB
+
 # Define the website hostname and e-mail for the VirtualHost
 # Several option groups here, comment in / out as necessary
 # Localhost
