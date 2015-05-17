@@ -117,18 +117,16 @@ apt-get -y install wget
 
 # Install software
 echo "\n#\tInstalling software packages"
-# Note: libgeos++-dev is included here too (the nominatim install page suggests installing it if there is a problem with the 'pear install DB' below - it seems safe to install it anyway)
-apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev libgeos++-dev
-apt-get -y install gcc proj-bin libgeos-c1 git osmosis
-apt-get -y install php5 php-pear php5-pgsql php5-json
+apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
+apt-get -y install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev
+apt-get -y install gcc proj-bin libgeos-c1 osmosis libgeos++-dev
+apt-get -y install php5 php-pear php5-pgsql php5-json php-db
+apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
+apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 
 # Some additional packages that may not already be installed
 # bc is needed in configPostgresql.sh
 apt-get -y install bc
-
-# Install Postgres, PostGIS and dependencies
-echo "\n#\tInstalling postgres and link to postgis"
-apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 
 # Install Apache
 echo "\n#\tInstalling Apache"
@@ -137,10 +135,6 @@ apt-get -y install apache2
 # Install gdal, needed for US Tiger house number data (more steps need to be added to this script to support that US data)
 echo "\n#\tInstalling gdal"
 apt-get -y install python-gdal
-
-# Add Protobuf support
-echo "\n#\tInstalling protobuf"
-apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 
 # Temporarily allow commands to fail without exiting the script
 set +e
