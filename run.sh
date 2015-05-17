@@ -123,7 +123,7 @@ apt-get -y install postgresql postgis postgresql-contrib postgresql-9.1-postgis 
 echo "\n#\tInstalling Apache"
 apt-get -y install apache2
 
-# Install gdal - which is apparently used for US data (more steps need to be added to this script to support that US data)
+# Install gdal, needed for US Tiger house number data (more steps need to be added to this script to support that US data)
 echo "\n#\tInstalling gdal"
 apt-get -y install python-gdal
 
