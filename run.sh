@@ -314,8 +314,7 @@ cat > /etc/apache2/sites-available/${nominatimVHfile} << EOF
         <Directory ${wwwNominatim}>
                 Options FollowSymLinks MultiViews
                 AllowOverride None
-                Order allow,deny
-                Allow from all
+                Require all granted
         </Directory>
         AddType text/html .php
 </VirtualHost>
