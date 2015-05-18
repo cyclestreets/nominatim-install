@@ -41,7 +41,7 @@ postgresconfigmode=oltp
 override_maintenance_work_mem=
 # Default cache
 osm2pgsqlcache=
-# Define the location of the .pdf OSM data file
+# Define the location of the .pbf OSM data file; -latest.osm.pbf will be appended automatically
 # Several option groups here, comment in / out as necessary
 # Andorra (install, without wikipedia data, takes 12 minutes)
 osmdatafolder=europe/
