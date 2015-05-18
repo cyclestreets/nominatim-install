@@ -156,7 +156,7 @@ fi
 
 # Restart postgres assume the new config
 echo "\n#\tRestarting PostgreSQL"
-/etc/init.d/postgresql restart
+service postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd /home/${username}
@@ -325,7 +325,7 @@ EOF
 a2ensite ${nominatimVHfile}
 # skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
-    /etc/init.d/apache2 reload
+    service apache2 reload
 fi
 
 echo "#\tNominatim website created $(date)"
@@ -347,7 +347,7 @@ ${nomInstalDir}/configPostgresqlDiskWrites.sh
 echo "\n#\tReloading PostgreSQL"
 # skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
-    /etc/init.d/postgresql reload
+    service postgresql reload
 fi
 
 # Updating Nominatim
