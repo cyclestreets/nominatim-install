@@ -1,16 +1,16 @@
-Bash script to install Nominatim on Ubuntu
+# Bash script to install Nominatim on Ubuntu
 
 Tested on 14.04 using Postgres 9.3
 
 http://wiki.openstreetmap.org/wiki/Nominatim/Installation
 
-After the repository has been cloned from github, proceed by making your own *.config.sh* file based on the *.config.sh.template* file.
+After the repository has been cloned from github, proceed by making your own `.config.sh` file based on the `.config.sh.template` file.
 
-Running the installation script *run.sh* (as *root*) will:
+Running the installation script `run.sh` (as *root*) will:
 
  * create a *nominatim* user
  * download all the necessary packages
- * download the planet extract as defined by the *.config.sh* file
+ * download the planet extract as defined by the `.config.sh` file
  * build the Nominatim index
  * create a virtual host
 
@@ -36,4 +36,14 @@ git clone https://github.com/cyclestreets/nominatim-install.git
 sudo mv nominatim-install /opt
 cd /opt/nominatim-install/
 git config core.sharedRepository group
+
+# Instantiate a config file
+cp .config.sh.template .config.sh
+
+# Edit .config.sh
+# At least set a password for the nominatim user
+# Rest of file defaults to processing Andorra - which should take about half an hour
+
+# Run the installation
+sudo ./run.sh
 ```
