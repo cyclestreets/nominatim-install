@@ -28,7 +28,7 @@ nominatimVHfile=400-nominatim.conf
 # On a machine with 1.2TB disk, 32 GB RAM, Quad processors - it took 10 days to run and used about 700GB. (December 2013)
 #planetUrl=http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/pbf/
 #postgresconfigmode=dw
-#override_maintenance_work_mem=16GB
+#override_maintenance_work_mem=10GB
 # 18GB is recommended for full planet import (arg value is in MB)
 #osm2pgsqlcache="--osm2pgsql-cache 18000"
 
