@@ -2,7 +2,7 @@
 # Script to install Nominatim on Ubuntu
 # Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
-# Synced with: Latest revision as of 21:25, 12 February 2014
+# Synced with: Latest revision as of 08:28, 27 February 2014
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
@@ -136,17 +136,6 @@ apt-get -y install apache2
 # Install gdal, needed for US Tiger house number data (more steps need to be added to this script to support that US data)
 echo "\n#\tInstalling gdal"
 apt-get -y install python-gdal
-
-# Temporarily allow commands to fail without exiting the script
-set +e
-
-# PHP Pear::DB is needed for the runtime website
-# There doesn't seem an easy way to avoid this failing if it is already installed.
-echo "\n#\tInstalling pear DB"
-pear install DB
-
-# Bomb out if something goes wrong
-set -e
 
 # skip if doing a Docker install as kernel parameters cannot be modified
 if [ -z "${dockerInstall}" ]; then
