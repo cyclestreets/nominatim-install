@@ -21,15 +21,19 @@ The *root* user is required to install the packages, but most of the installatio
 
 Add this repository to a machine using the following, as your normal username (not root). In the listing the grouped items can usually be cut and pasted together into the command shell, others require responding to a prompt:
 
-    cd ~
-    sudo apt-get -y install git
-    
-    # Optionally configure git
-    # git config --global user.name "Your git username"
-    # git config --global user.email "Your git email"
-    
-    git clone https://github.com/cyclestreets/nominatim-install.git
-    
-    sudo mv nominatim-install /opt
-    cd /opt/nominatim-install/
-    git config core.sharedRepository group
+```shell
+# Install git
+sudo apt-get -y install git
+
+# Tell git who you are
+git config --global user.name "Your git username"
+git config --global user.email "Your git email"
+
+# Clone the installer
+git clone https://github.com/cyclestreets/nominatim-install.git
+
+# Move to the right place
+sudo mv nominatim-install /opt
+cd /opt/nominatim-install/
+git config core.sharedRepository group
+```
