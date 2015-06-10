@@ -2,7 +2,7 @@
 # Script to install Nominatim on Ubuntu
 # Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
-# Synced with: Latest revision as of 07:41, 20 August 2014
+# Synced with: Latest revision as of 21:43, 21 May 2015
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
@@ -275,11 +275,11 @@ echo "#\tDone Import and index OSM data $(date)"
 
 # Add special phrases
 echo "#\tStarting special phrases $(date)"
-sudo -u ${username} ./utils/specialphrases.php --countries > specialphrases_countries.sql
-sudo -u ${username} psql -d nominatim -f specialphrases_countries.sql
+sudo -u ${username} ./utils/specialphrases.php --countries > data/specialphrases_countries.sql
+sudo -u ${username} psql -d nominatim -f data/specialphrases_countries.sql
 sudo -u ${username} rm -f specialphrases_countries.sql
-sudo -u ${username} ./utils/specialphrases.php --wiki-import > specialphrases.sql
-sudo -u ${username} psql -d nominatim -f specialphrases.sql
+sudo -u ${username} ./utils/specialphrases.php --wiki-import > data/specialphrases.sql
+sudo -u ${username} psql -d nominatim -f data/specialphrases.sql
 sudo -u ${username} rm -f specialphrases.sql
 echo "#\tDone special phrases $(date)"
 
