@@ -29,8 +29,8 @@ nominatimVHfile=400-nominatim.conf
 #planetUrl=http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/pbf/
 #postgresconfigmode=dw
 #override_maintenance_work_mem=10GB
-# 18GB is recommended for full planet import (arg value is in MB)
-#osm2pgsqlcache="--osm2pgsql-cache 18000"
+# 24GB is recommended for full planet import (arg value is in MB)
+#osm2pgsqlcache="--osm2pgsql-cache 24000"
 
 
 ## Geofabrik Extract
