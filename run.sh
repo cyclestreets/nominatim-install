@@ -2,7 +2,7 @@
 # Script to install Nominatim on Ubuntu
 # Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
-# Synced with: Latest revision as of 18:41, 22 January 2014
+# Synced with: Latest revision as of 21:25, 12 February 2014
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
@@ -249,6 +249,10 @@ cat > ${localNominatimSettings} << EOF
    // Paths
    @define('CONST_Postgresql_Version', '9.3');
    @define('CONST_Postgis_Version', '2.1');
+
+   // Osmosis
+   @define('CONST_Osmosis_Binary', '/usr/local/bin/osmosis');
+
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
 EOF
