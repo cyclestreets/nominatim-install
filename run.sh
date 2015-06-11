@@ -199,7 +199,11 @@ service postgresql restart
 # We will use the Nominatim user's homedir for the installation, so switch to that
 eval cd /home/${username}
 
+# First Installation
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#First_Installation
+
 # Get Nominatim software
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Obtaining_the_Latest_Version
 apt-get -y install git autoconf-archive
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
@@ -216,11 +220,15 @@ else
 fi
 
 # Compile Nominatim software
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Compiling_the_Source
 echo "\n#\tCompiling Nominatim software"
 sudo -u ${username} ./autogen.sh
 sudo -u ${username} ./configure
 sudo -u ${username} make
 
+# Customization of the Installation
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Customization_of_the_Installation
+# !! Note this is out of sync with the wiki
 
 # Get Wikipedia data which helps with name importance hinting
 echo "\n#\tWikipedia data"
@@ -311,8 +319,10 @@ fi
 chown ${username}:${username} ${localNominatimSettings}
 
 # Import and index main OSM data
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Import_and_index_OSM_data
 eval cd /home/${username}/Nominatim/
 echo "#\tStarting import and index OSM data $(date)"
+
 # Experimentally trying with two threads here
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log
 # Note: if that step gets interrupted for some reason it can be resumed using:
