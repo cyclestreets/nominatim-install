@@ -1,16 +1,19 @@
 #!/bin/sh
 # Script to install Nominatim on Ubuntu
 # Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
+#
+# Based on OSM Nominatim wiki:
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 # Synced with: Latest revision as of 21:43, 21 May 2015
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
 
-echo "#\tNominatim installation $(date)"
+# Announce start
+echo "#	$(date)	Nominatim installation"
 
 # Ensure this script is run as root
 if [ "$(id -u)" != "0" ]; then
-    echo "#\tThis script must be run as root." 1>&2
+    echo "#	This script must be run as root." 1>&2
     exit 1
 fi
 
@@ -72,6 +75,50 @@ fi
 # Where the downloaded data is stored
 osmdatapath=data/${osmdatafolder}${osmdatafilename}
 
+## Osmosis
+# Rather than the packaged version get the latest
+osmosisBinary=/usr/local/bin/osmosis
+
+# Check Osmosis has been installed
+if [ ! -L "${osmosisBinary}" ]; then
+
+    # Announce Osmosis installation
+    # !! Osmosis uses MySQL and that needs to be configured to use character_set_server=utf8 and collation_server=utf8_unicode_ci which is currently set up (machine wide) by CycleStreets website installation.
+    echo "#	$(date)	CycleStreets / Osmosis installation"
+
+    # Prepare the apt index
+    apt-get update > /dev/null
+
+    # Osmosis requires java
+    apt-get -y install openjdk-7-jre
+
+    # Create folder
+    mkdir -p /usr/local/osmosis
+
+    # wget the latest to here
+    if [ ! -e /usr/local/osmosis/osmosis-latest.tgz ]; then
+	wget -O /usr/local/osmosis/osmosis-latest.tgz http://dev.openstreetmap.org/~bretth/osmosis-build/osmosis-latest.tgz
+    fi
+
+    # Create a folder for the new version
+    mkdir -p /usr/local/osmosis/osmosis-latest
+
+    # Unpack into it
+    tar xzf /usr/local/osmosis/osmosis-latest.tgz -C /usr/local/osmosis/osmosis-latest
+
+    # Remove the download archive
+    rm -f /usr/local/osmosis/osmosis-latest.tgz
+
+    # Repoint current to the new install
+    rm -f /usr/local/osmosis/current
+
+    # Link to it
+    ln -s /usr/local/osmosis/osmosis-latest/bin/osmosis ${osmosisBinary}
+
+    # Announce completion
+    echo "#	Completed installation of osmosis"
+fi
+
 
 ### MAIN PROGRAM ###
 
@@ -120,7 +167,8 @@ apt-get -y install wget
 echo "\n#\tInstalling software packages"
 apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
 apt-get -y install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev
-apt-get -y install gcc proj-bin libgeos-c1 osmosis libgeos++-dev
+# Note: osmosis is removed from this next line (compared to wiki page) as it is installed directly
+apt-get -y install gcc proj-bin libgeos-c1 libgeos++-dev
 apt-get -y install php5 php-pear php5-pgsql php5-json php-db
 apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
@@ -240,7 +288,7 @@ cat > ${localNominatimSettings} << EOF
    @define('CONST_Postgis_Version', '2.1');
 
    // Osmosis
-   @define('CONST_Osmosis_Binary', '/usr/local/bin/osmosis');
+   @define('CONST_Osmosis_Binary', '${osmosisBinary}');
 
    // Website settings
    @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
