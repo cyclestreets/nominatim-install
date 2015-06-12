@@ -3,7 +3,7 @@
 # Tested on 14.04 (View Ubuntu version using 'lsb_release -a') using Postgres 9.3
 #
 # Based on OSM Nominatim wiki:
-# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation
 # Synced with: Latest revision as of 21:43, 21 May 2015
 
 # !! Marker #idempotent indicates limit of testing for idempotency - it has not yet been possible to make it fully idempotent.
@@ -159,12 +159,10 @@ fi
 apt-get update
 
 # Install basic software
-apt-get -y install sudo
-apt-get -y install wget
-
+apt-get -y install sudo wget
 
 # Install software
-echo "\n#\tInstalling software packages"
+# http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
 apt-get -y install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev
 # Note: osmosis is removed from this next line (compared to wiki page) as it is installed directly
@@ -173,19 +171,16 @@ apt-get -y install php5 php-pear php5-pgsql php5-json php-db
 apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 
-# Some additional packages that may not already be installed
+# Additional packages
 # bc is needed in configPostgresql.sh
-apt-get -y install bc
+apt-get -y install bc apache2 git autoconf-archive
 
-# Install Apache
-echo "\n#\tInstalling Apache"
-apt-get -y install apache2
-
-# Install gdal, needed for US Tiger house number data (more steps need to be added to this script to support that US data)
+# Install gdal, needed for US Tiger house number data
+# !! More steps need to be added to this script to support that US data
 echo "\n#\tInstalling gdal"
 apt-get -y install python-gdal
 
-# skip if doing a Docker install as kernel parameters cannot be modified
+# Skip if doing a Docker install as kernel parameters cannot be modified
 if [ -z "${dockerInstall}" ]; then
     # Tuning PostgreSQL
     echo "\n#\tTuning PostgreSQL"
@@ -204,7 +199,6 @@ eval cd /home/${username}
 
 # Get Nominatim software
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Obtaining_the_Latest_Version
-apt-get -y install git autoconf-archive
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
     echo "\n#\tInstalling Nominatim software"
@@ -396,7 +390,7 @@ ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
 echo "\n#\tReloading PostgreSQL"
-# skip if doing a Docker install
+# Skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
     service postgresql reload
 fi
