@@ -222,7 +222,39 @@ sudo -u ${username} make
 
 # Customization of the Installation
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Customization_of_the_Installation
-# !! Note this is out of sync with the wiki
+
+# Add local Nominatim settings
+localNominatimSettings=/home/${username}/Nominatim/settings/local.php
+
+cat > ${localNominatimSettings} << EOF
+<?php
+   // Paths
+   @define('CONST_Postgresql_Version', '9.3');
+   @define('CONST_Postgis_Version', '2.1');
+
+   // Osmosis
+   @define('CONST_Osmosis_Binary', '${osmosisBinary}');
+
+   // Website settings
+   @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
+EOF
+
+# By default, Nominatim is configured to update using the global minutely diffs
+if [ -z "${planetUrl}" ]; then
+
+    # When using GeoFabrik extracts append these lines to set up the update process
+    cat >> ${localNominatimSettings} << EOF
+   // Setting up the update process
+   @define('CONST_Replication_Url', '${osmupdates}');
+   @define('CONST_Replication_MaxInterval', '86400');     // Process each update separately, osmosis cannot merge multiple updates
+   @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
+   @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
+EOF
+fi
+
+# Change settings file to Nominatim ownership
+chown ${username}:${username} ${localNominatimSettings}
+
 
 # Get Wikipedia data which helps with name importance hinting
 echo "\n#\tWikipedia data"
@@ -279,38 +311,6 @@ fi
 # Remove any pre-existing nominatim database
 echo "\n#\tRemove any pre-existing nominatim database"
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
-
-# Add local Nominatim settings
-localNominatimSettings=/home/${username}/Nominatim/settings/local.php
-
-cat > ${localNominatimSettings} << EOF
-<?php
-   // Paths
-   @define('CONST_Postgresql_Version', '9.3');
-   @define('CONST_Postgis_Version', '2.1');
-
-   // Osmosis
-   @define('CONST_Osmosis_Binary', '${osmosisBinary}');
-
-   // Website settings
-   @define('CONST_Website_BaseURL', 'http://${websiteurl}/');
-EOF
-
-# By default, Nominatim is configured to update using the global minutely diffs
-if [ -z "${planetUrl}" ]; then
-
-    # When using GeoFabrik extracts append these lines to set up the update process
-    cat >> ${localNominatimSettings} << EOF
-   // Setting up the update process
-   @define('CONST_Replication_Url', '${osmupdates}');
-   @define('CONST_Replication_MaxInterval', '86400');     // Process each update separately, osmosis cannot merge multiple updates
-   @define('CONST_Replication_Update_Interval', '86400');  // How often upstream publishes diffs
-   @define('CONST_Replication_Recheck_Interval', '900');   // How long to sleep if no update found yet
-EOF
-fi
-
-# Change settings file to Nominatim ownership
-chown ${username}:${username} ${localNominatimSettings}
 
 # Import and index main OSM data
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Import_and_index_OSM_data
