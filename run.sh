@@ -390,20 +390,22 @@ echo "#	$(date)	Done enable hierarchical updates"
 echo "#	$(date)	Retuning PostgreSQL for disk writes"
 ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
-# Reload postgres assume the new config
-echo "#	$(date)	Reloading PostgreSQL"
 # Skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
+    # Reload postgres assume the new config
+    echo "#	$(date)	Reloading PostgreSQL"
     service postgresql reload
 fi
 
 # Updating Nominatim
 # Using two threads for the upadate will help performance, by adding this option: --index-instances 2
 # Going much beyond two threads is not really worth it because the threads interfere with each other quite a bit.
-#  If your system is live and serving queries, keep an eye on response times at busy times, because too many update threads might interfere there, too.
-# skip if doing a Docker install
+# If your system is live and serving queries, keep an eye on response times at busy times, because too many update threads might interfere there, too.
+# Skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
-    sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi
+    echo "#	$(date)	Updating PostgreSQL"
+    echo "#	sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi ${osm2pgsqlcache}"
+    sudo -u ${username} ./utils/update.php --import-osmosis-all --no-npi ${osm2pgsqlcache}
 fi
 
 # Done
