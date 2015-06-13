@@ -338,7 +338,6 @@ sudo -u ${username} rm -f specialphrases.sql
 echo "#	$(date)	Done special phrases"
 
 # Set up the website for use with Apache
-wwwNominatim=/var/www/nominatim
 sudo mkdir -pm 755 ${wwwNominatim}
 sudo chown ${username} ${wwwNominatim}
 sudo -u ${username} ./utils/setup.php --create-website ${wwwNominatim}

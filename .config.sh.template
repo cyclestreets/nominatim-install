@@ -25,6 +25,9 @@ nominatimVHfile=400-nominatim.conf
 # Default is yes. To turn off this feature leave as blank.
 includeWikipedia=yes
 
+# Set up the website for use with Apache
+wwwNominatim=/websites/www/nominatim
+
 ### SETTINGS ###
 # Define either a full planet, or an extract by commenting in the relevant sections
 
@@ -51,6 +54,7 @@ osm2pgsqlcache="--osm2pgsql-cache 512"
 # Define the location of the .pbf OSM data file; -latest.osm.pbf will be appended automatically
 # Several option groups here, comment in / out as necessary
 # Andorra (install, without wikipedia data, takes 12 minutes)
+# Test street: Andorra la Vella
 osmdatafolder=europe/
 osmdatacountry=andorra
 
