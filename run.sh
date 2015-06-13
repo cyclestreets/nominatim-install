@@ -318,8 +318,7 @@ sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 cd /home/${username}/Nominatim/
 echo "#	$(date)	Starting import and index OSM data"
 echo "#	sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all 2>&1 | tee setup.log"
-
-# Experimentally trying with two threads here
+# Should automatically use one fewer than the number of threads: https://github.com/twain47/Nominatim/blob/master/utils/setup.php#L67
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all 2>&1 | tee setup.log
 # Note: if that step gets interrupted for some reason it can be resumed using:
 # If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
