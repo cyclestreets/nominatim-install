@@ -34,7 +34,7 @@ configFile=.config.sh
 
 # Generate your own credentials file by copying from .config.sh.template
 if [ ! -e ./${configFile} ]; then
-    echo "#\tThe config file, ${configFile}, does not exist - copy your own based on the ${configFile}.template file." 1>&2
+    echo "#	The config file, ${configFile}, does not exist - copy your own based on the ${configFile}.template file." 1>&2
     exit 1
 fi
 
@@ -145,14 +145,14 @@ else
 	printf "\n"
 	stty echo
 	if [ $password != $passwordconfirm ]; then
-	    echo "#\tThe passwords did not match"
+	    echo "#	The passwords did not match"
 	    exit 1
 	fi
     fi
 
     # Create the nominatim user
     useradd -m -p $password $username
-    echo "#\tNominatim user ${username} created"
+    echo "#	Nominatim user ${username} created"
 fi
 
 # Prepare the apt index; it may be practically non-existent on a fresh VM
@@ -299,7 +299,7 @@ if test ! -r ${osmdatapath}; then
 	# Verify with an MD5 match
 	sudo -u ${username} wget --output-document=${osmdatapath}.md5 ${osmdataurl}.md5
 	if [ "$(md5sum ${osmdatapath} | awk '{print $1;}')" != "$(cat ${osmdatapath}.md5 | awk '{print $1;}')" ]; then
-		echo "#\tThe md5 checksum for osmdatapath: ${osmdatapath} does not match, stopping."
+		echo "#	The md5 checksum for osmdatapath: ${osmdatapath} does not match, stopping."
 		exit 1
 		echo "#	$(date)	Downloaded OSM data integrity verified by md5 check."
 	fi
@@ -315,7 +315,7 @@ sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 # Import and index main OSM data
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Import_and_index_OSM_data
 eval cd /home/${username}/Nominatim/
-echo "#\tStarting import and index OSM data $(date)"
+echo "#	$(date)	Starting import and index OSM data"
 
 # Experimentally trying with two threads here
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log
@@ -323,17 +323,17 @@ sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${usern
 # (Threads argument is optional, it'll default to one less than number of available cpus.)
 # If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
 # sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices --threads 2
-echo "#\tDone Import and index OSM data $(date)"
+echo "#	$(date)	Done Import and index OSM data"
 
 # Add special phrases
-echo "#\tStarting special phrases $(date)"
+echo "#	$(date)	Starting special phrases"
 sudo -u ${username} ./utils/specialphrases.php --countries > data/specialphrases_countries.sql
 sudo -u ${username} psql -d nominatim -f data/specialphrases_countries.sql
 sudo -u ${username} rm -f specialphrases_countries.sql
 sudo -u ${username} ./utils/specialphrases.php --wiki-import > data/specialphrases.sql
 sudo -u ${username} psql -d nominatim -f data/specialphrases.sql
 sudo -u ${username} rm -f specialphrases.sql
-echo "#\tDone special phrases $(date)"
+echo "#	$(date)	Done special phrases"
 
 # Set up the website for use with Apache
 wwwNominatim=/var/www/nominatim
@@ -373,16 +373,16 @@ if [ -z "${dockerInstall}" ]; then
     service apache2 reload
 fi
 
-echo "#\tNominatim website created $(date)"
+echo "#	$(date)	Nominatim website created"
 
 # Setting up the update process
 rm -f /home/${username}/Nominatim/settings/configuration.txt
 sudo -u ${username} ./utils/setup.php --osmosis-init
-echo "#\tDone setup $(date)"
+echo "#	$(date)	Done setup"
 
 # Enabling hierarchical updates
 sudo -u ${username} ./utils/setup.php --create-functions --enable-diff-updates
-echo "#\tDone enable hierarchical updates $(date)"
+echo "#	$(date)	Done enable hierarchical updates"
 
 # Adust PostgreSQL to do disk writes
 echo "#	$(date)	Retuning PostgreSQL for disk writes"
