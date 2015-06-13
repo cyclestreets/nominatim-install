@@ -225,7 +225,6 @@ sudo -u ${username} make
 
 # Add local Nominatim settings
 localNominatimSettings=/home/${username}/Nominatim/settings/local.php
-
 cat > ${localNominatimSettings} << EOF
 <?php
    // Paths
@@ -244,6 +243,7 @@ if [ -z "${planetUrl}" ]; then
 
     # When using GeoFabrik extracts append these lines to set up the update process
     cat >> ${localNominatimSettings} << EOF
+
    // Setting up the update process
    @define('CONST_Replication_Url', '${osmupdates}');
    @define('CONST_Replication_MaxInterval', '86400');     // Process each update separately, osmosis cannot merge multiple updates
