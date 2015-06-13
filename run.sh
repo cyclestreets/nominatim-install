@@ -177,18 +177,18 @@ apt-get -y install bc apache2 git autoconf-archive
 
 # Install gdal, needed for US Tiger house number data
 # !! More steps need to be added to this script to support that US data
-echo "\n#\tInstalling gdal"
+echo "#	$(date)	Installing gdal"
 apt-get -y install python-gdal
 
 # Skip if doing a Docker install as kernel parameters cannot be modified
 if [ -z "${dockerInstall}" ]; then
     # Tuning PostgreSQL
-    echo "\n#\tTuning PostgreSQL"
+    echo "#	$(date)	Tuning PostgreSQL"
     ./configPostgresql.sh ${postgresconfigmode} n ${override_maintenance_work_mem}
 fi
 
 # Restart postgres assume the new config
-echo "\n#\tRestarting PostgreSQL"
+echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
@@ -201,12 +201,12 @@ eval cd /home/${username}
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Obtaining_the_Latest_Version
 if [ ! -d "/home/${username}/Nominatim/.git" ]; then
     # Install
-    echo "\n#\tInstalling Nominatim software"
+    echo "#	$(date)	Installing Nominatim software"
     sudo -u ${username} git clone --recursive https://github.com/twain47/Nominatim.git
     cd Nominatim
 else
     # Update
-    echo "\n#\tUpdating Nominatim software"
+    echo "#	$(date)	Updating Nominatim software"
     cd Nominatim
     sudo -u ${username} git pull
     # Some of the schema is created by osm2pgsql which is updated by:
@@ -215,7 +215,7 @@ fi
 
 # Compile Nominatim software
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Compiling_the_Source
-echo "\n#\tCompiling Nominatim software"
+echo "#	$(date)	Compiling Nominatim software"
 sudo -u ${username} ./autogen.sh
 sudo -u ${username} ./configure
 sudo -u ${username} make
@@ -257,7 +257,7 @@ chown ${username}:${username} ${localNominatimSettings}
 
 
 # Get Wikipedia data which helps with name importance hinting
-echo "\n#\tWikipedia data"
+echo "#	$(date)	Wikipedia data"
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
 # Download them if they are not already present - the available ones date from early 2012.
 if test ! -r data/wikipedia_article.sql.bin; then
@@ -274,16 +274,16 @@ fi
 
 # http://stackoverflow.com/questions/8546759/how-to-check-if-a-postgres-user-exists
 # Creating the importer account in Postgres
-echo "\n#\tCreating the importer account"
+echo "#	$(date)	Creating the importer account -s gives superuser rights"
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${username}'" | grep -q 1 || sudo -u postgres createuser -s $username
 
 # Create website user in Postgres
-echo "\n#\tCreating website user"
+echo "#	$(date)	Creating website user"
 websiteUser=www-data
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${websiteUser}'" | grep -q 1 || sudo -u postgres createuser -SDR ${websiteUser}
 
 # Nominatim module reading permissions
-echo "\n#\tNominatim module reading permissions"
+echo "#	$(date)	Nominatim module reading permissions"
 chmod +x "/home/${username}"
 chmod +x "/home/${username}/Nominatim"
 chmod +x "/home/${username}/Nominatim/module"
@@ -293,7 +293,7 @@ sudo -u ${username} mkdir -p data/${osmdatafolder}
 
 # Download OSM data if not already present
 if test ! -r ${osmdatapath}; then
-	echo "\n#\tDownload OSM data"
+	echo "#	$(date)	Download OSM data"
 	sudo -u ${username} wget --output-document=${osmdatapath} ${osmdataurl}
 	
 	# Verify with an MD5 match
@@ -301,7 +301,7 @@ if test ! -r ${osmdatapath}; then
 	if [ "$(md5sum ${osmdatapath} | awk '{print $1;}')" != "$(cat ${osmdatapath}.md5 | awk '{print $1;}')" ]; then
 		echo "#\tThe md5 checksum for osmdatapath: ${osmdatapath} does not match, stopping."
 		exit 1
-		echo "\n#\tDownloaded OSM data integrity verified by md5 check."
+		echo "#	$(date)	Downloaded OSM data integrity verified by md5 check."
 	fi
 fi
 
@@ -309,7 +309,7 @@ fi
 #idempotent
 # Cannot make idempotent safely from here because that would require editing nominatim's setup scripts.
 # Remove any pre-existing nominatim database
-echo "\n#\tRemove any pre-existing nominatim database"
+echo "#	$(date)	Remove any pre-existing nominatim database"
 sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Import and index main OSM data
@@ -348,7 +348,7 @@ Disallow: /
 EOF
 
 # Create a VirtualHost for Apache
-echo "\n#\tCreate a VirtualHost for Apache"
+echo "#	$(date)	Create a VirtualHost for Apache"
 cat > /etc/apache2/sites-available/${nominatimVHfile} << EOF
 <VirtualHost *:80>
         ServerName ${websiteurl}
@@ -385,11 +385,11 @@ sudo -u ${username} ./utils/setup.php --create-functions --enable-diff-updates
 echo "#\tDone enable hierarchical updates $(date)"
 
 # Adust PostgreSQL to do disk writes
-echo "\n#\tRetuning PostgreSQL for disk writes"
+echo "#	$(date)	Retuning PostgreSQL for disk writes"
 ${nomInstalDir}/configPostgresqlDiskWrites.sh
 
 # Reload postgres assume the new config
-echo "\n#\tReloading PostgreSQL"
+echo "#	$(date)	Reloading PostgreSQL"
 # Skip if doing a Docker install
 if [ -z "${dockerInstall}" ]; then
     service postgresql reload
@@ -405,6 +405,6 @@ if [ -z "${dockerInstall}" ]; then
 fi
 
 # Done
-echo "#\tNominatim installation completed $(date)"
+echo "#	$(date)	Nominatim installation completed."
 
 # End of file
