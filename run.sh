@@ -302,8 +302,8 @@ if test ! -r ${osmdatapath}; then
 	if [ "$(md5sum ${osmdatapath} | awk '{print $1;}')" != "$(cat ${osmdatapath}.md5 | awk '{print $1;}')" ]; then
 		echo "#	The md5 checksum for osmdatapath: ${osmdatapath} does not match, stopping."
 		exit 1
-		echo "#	$(date)	Downloaded OSM data integrity verified by md5 check."
 	fi
+	echo "#	$(date)	Downloaded OSM data integrity verified by md5 check."
 fi
 
 
