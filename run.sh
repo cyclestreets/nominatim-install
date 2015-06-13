@@ -192,7 +192,7 @@ echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
-eval cd /home/${username}
+cd /home/${username}
 
 # First Installation
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#First_Installation
@@ -258,6 +258,7 @@ chown ${username}:${username} ${localNominatimSettings}
 
 # Get Wikipedia data which helps with name importance hinting
 echo "#	$(date)	Wikipedia data"
+
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
 # Download them if they are not already present - the available ones date from early 2012.
 if test ! -r data/wikipedia_article.sql.bin; then
@@ -314,8 +315,9 @@ sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
 # Import and index main OSM data
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Import_and_index_OSM_data
-eval cd /home/${username}/Nominatim/
+cd /home/${username}/Nominatim/
 echo "#	$(date)	Starting import and index OSM data"
+echo "#	sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log"
 
 # Experimentally trying with two threads here
 sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log

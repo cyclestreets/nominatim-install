@@ -39,19 +39,24 @@ planetUrl=
 geofabrikUrl=http://download.geofabrik.de/
 postgresconfigmode=oltp
 override_maintenance_work_mem=
-# Default cache
-osm2pgsqlcache=
+
+# Default cache size
+# Seemed to be necessary to use cache as small as 512MB on a VM that had 2GB RAM.
+osm2pgsqlcache="--osm2pgsql-cache 512"
+
 # Define the location of the .pbf OSM data file; -latest.osm.pbf will be appended automatically
 # Several option groups here, comment in / out as necessary
 # Andorra (install, without wikipedia data, takes 12 minutes)
 osmdatafolder=europe/
 osmdatacountry=andorra
+
 ## British Isles
 #osmdatafolder=europe/
 #osmdatacountry=british-isles
 ## Iceland
 #osmdatafolder=europe/
 #osmdatacountry=iceland
+
 ## Europe
 # On a machine with 64GB ram and four processors takes 2.5 days to complete the initial install Oct 2012.
 #osmdatafolder=
