@@ -260,11 +260,11 @@ chown ${username}:${username} ${localNominatimSettings}
 echo "#	$(date)	Wikipedia data"
 
 # These large files are optional, and if present take a long time to process by ./utils/setup.php later in the script.
-# Download them if they are not already present - the available ones date from early 2012.
-if test ! -r data/wikipedia_article.sql.bin; then
+# Download them if wanted by config and they are not already present.
+if test -n "${includeWikipedia}" -a ! -r data/wikipedia_article.sql.bin; then
     sudo -u ${username} wget --output-document=data/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
 fi
-if test ! -r data/wikipedia_redirect.sql.bin; then
+if test -n "${includeWikipedia}" -a ! -r data/wikipedia_redirect.sql.bin; then
     sudo -u ${username} wget --output-document=data/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
 fi
 

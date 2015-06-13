@@ -21,6 +21,10 @@ password=
 # Apache virtual host configuration file name - with .conf extension
 nominatimVHfile=400-nominatim.conf
 
+# Wikipedia rankings
+# Default is yes. To turn off this feature leave as blank.
+includeWikipedia=yes
+
 ### SETTINGS ###
 # Define either a full planet, or an extract by commenting in the relevant sections
 
