@@ -317,14 +317,13 @@ sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Import_and_index_OSM_data
 cd /home/${username}/Nominatim/
 echo "#	$(date)	Starting import and index OSM data"
-echo "#	sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log"
+echo "#	sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all 2>&1 | tee setup.log"
 
 # Experimentally trying with two threads here
-sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all --threads 2 2>&1 | tee setup.log
+sudo -u ${username} ./utils/setup.php ${osm2pgsqlcache} --osm-file /home/${username}/Nominatim/${osmdatapath} --all 2>&1 | tee setup.log
 # Note: if that step gets interrupted for some reason it can be resumed using:
-# (Threads argument is optional, it'll default to one less than number of available cpus.)
 # If the reported rank is 26 or higher, you can also safely add --index-noanalyse.
-# sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices --threads 2
+# sudo -u ${username} ./utils/setup.php --index --index-noanalyse --create-search-indices
 echo "#	$(date)	Done Import and index OSM data"
 
 # Add special phrases
