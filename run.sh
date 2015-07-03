@@ -353,8 +353,8 @@ cat > /etc/apache2/sites-available/${nominatimVHfile} << EOF
         ServerName ${websiteurl}
         ServerAdmin ${emailcontact}
         DocumentRoot ${wwwNominatim}
-        CustomLog \${APACHE_LOG_DIR}/access.log combined
-        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/nominatim-access.log combined
+        ErrorLog \${APACHE_LOG_DIR}/nominatim-error.log
         LogLevel warn
         <Directory ${wwwNominatim}>
                 Options FollowSymLinks MultiViews
