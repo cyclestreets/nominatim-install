@@ -191,6 +191,11 @@ fi
 echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
+# Needed to help postgres munin charts work
+apt-get -y install libdbd-pg-perl
+munin-node-configure --shell | grep postgres | sh
+service munin-reload restart
+
 # We will use the Nominatim user's homedir for the installation, so switch to that
 cd /home/${username}
 
@@ -395,7 +400,7 @@ if [ -z "${dockerInstall}" ]; then
 fi
 
 # Updating Nominatim
-# Using two threads for the upadate will help performance, by adding this option: --index-instances 2
+# Using two threads for the update will help performance, by adding this option: --index-instances 2
 # Going much beyond two threads is not really worth it because the threads interfere with each other quite a bit.
 # If your system is live and serving queries, keep an eye on response times at busy times, because too many update threads might interfere there, too.
 # Skip if doing a Docker install
