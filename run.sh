@@ -191,10 +191,18 @@ fi
 echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
+# Nominatim munin
+# !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
+ln -s '/home/nominatim/Nominatim/munin/nominatim_importlag' '/etc/munin/plugins/nominatim_importlag'
+ln -s '/home/nominatim/Nominatim/munin/nominatim_query_speed' '/etc/munin/plugins/nominatim_query_speed'
+ln -s '/home/nominatim/Nominatim/munin/nominatim_nominatim_requests' '/etc/munin/plugins/nominatim_nominatim_requests'
+
+
 # Needed to help postgres munin charts work
 apt-get -y install libdbd-pg-perl
 munin-node-configure --shell | grep postgres | sh
 service munin-reload restart
+
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
 cd /home/${username}
