@@ -271,6 +271,8 @@ CHECKPOINT_COMPLETION_TARGET=0.9
 # For the initial import - switch them on again afterwards or you risk database corruption
 FSYNC=off
 FULL_PAGE_WRITES=off
+# At OSMLondon Hack day on Sun 9 Aug 2015 was recommended to use this value instead of 4.0:
+RANDOM_PAGE_COST=1.5
 
 ### NOW THE FUN STUFF!!
 echo "#\tApplying system configuration settings to the server"
@@ -301,6 +303,7 @@ if [ -e $CONFIG_FILE ]; then
 -e "s/[#]*checkpoint_completion_target = .*/checkpoint_completion_target = $CHECKPOINT_COMPLETION_TARGET/" \
 -e "s/[#]*fsync = .*/fsync = $FSYNC/" \
 -e "s/[#]*full_page_writes = .*/full_page_writes = $FULL_PAGE_WRITES/" \
+-e "s/[#]*random_page_cost = .*/random_page_cost = $RANDOM_PAGE_COST/" \
 $CONFIG_FILE > $TEMP_FILE
 
 	# Make the change
