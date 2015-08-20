@@ -32,6 +32,10 @@ set -e
 # Name of the credentials file
 configFile=.config.sh
 
+### Swap File ###
+# Creates swap file if needed #
+./create_swap.sh
+
 # Generate your own credentials file by copying from .config.sh.template
 if [ ! -e ./${configFile} ]; then
     echo "#	The config file, ${configFile}, does not exist - copy your own based on the ${configFile}.template file." 1>&2
