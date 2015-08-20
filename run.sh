@@ -191,19 +191,6 @@ fi
 echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
-# Nominatim munin
-# !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
-ln -s '/home/nominatim/Nominatim/munin/nominatim_importlag' '/etc/munin/plugins/nominatim_importlag'
-ln -s '/home/nominatim/Nominatim/munin/nominatim_query_speed' '/etc/munin/plugins/nominatim_query_speed'
-ln -s '/home/nominatim/Nominatim/munin/nominatim_nominatim_requests' '/etc/munin/plugins/nominatim_nominatim_requests'
-
-
-# Needed to help postgres munin charts work
-apt-get -y install libdbd-pg-perl
-munin-node-configure --shell | grep postgres | sh
-service munin-reload restart
-
-
 # We will use the Nominatim user's homedir for the installation, so switch to that
 cd /home/${username}
 
@@ -232,6 +219,31 @@ echo "#	$(date)	Compiling Nominatim software"
 sudo -u ${username} ./autogen.sh
 sudo -u ${username} ./configure
 sudo -u ${username} make
+
+# Nominatim munin
+if [ !  -z "$setupMuninGraphs"  ]; then
+    if [  -z "$muninPluginsPath"  ]; then
+        echo "# Missing muninPluginsPath configuration" 1>&2
+        exit 1
+    fi
+
+    if [ ! -d "${muninPluginsPath}"  ]; then
+        echo "# Munin plugins directory does not exist: : ${muninPluginsPath}" 1>&2
+        exit 1
+    fi
+
+    echo "# Setup Munin as requested" 1>&2
+    
+    # !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
+    ln -s "/home/${username}/Nominatim/munin/nominatim_importlag" "${muninPluginsPath}/nominatim_importlag"
+    ln -s "/home/${username}/Nominatim/munin/nominatim_query_speed" "${muninPluginsPath}/nominatim_query_speed"
+    ln -s "/home/${username}/Nominatim/munin/nominatim_nominatim_requests" "${muninPluginsPath}/nominatim_nominatim_requests"
+
+    # Needed to help postgres munin charts work
+    apt-get -y install libdbd-pg-perl
+    munin-node-configure --shell | grep postgres | sh
+    service munin-reload restart
+fi
 
 # Customization of the Installation
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Customization_of_the_Installation
