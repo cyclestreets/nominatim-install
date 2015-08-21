@@ -13,6 +13,7 @@ Running the installation script `run.sh` (as *root*) will:
  * download the planet extract as defined by the `.config.sh` file
  * build the Nominatim index
  * create a virtual host
+ * setup Munin plugins (Note: server needs to be Munin node)
 
 The *root* user is required to install the packages, but most of the installation is done as the *nominatim* user (using *sudo*).
 
@@ -42,6 +43,7 @@ cp .config.sh.template .config.sh
 
 # Edit .config.sh
 # At least set a password for the nominatim user
+# Disable ```setupMuninGraphs``` if you don't have a Munin node running
 # Rest of file defaults to processing Andorra - which should take about half an hour
 
 # Run the installation

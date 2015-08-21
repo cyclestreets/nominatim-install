@@ -20,7 +20,7 @@ password=
 
 # Enable Munin graphs. To turn off this feature leave as blank.
 # setupMuninGraphs=yes enables the feature
-setupMuninGraphs=
+setupMuninGraphs=yes
 # Munin plugins path wthout trailing /!
 muninPluginsPath=/etc/munin/plugins
 
