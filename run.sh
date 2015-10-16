@@ -164,7 +164,7 @@ apt-get -y install sudo wget
 # Install software
 # http://wiki.openstreetmap.org/wiki/Nominatim/Installation#Ubuntu.2FDebian
 apt-get -y install build-essential libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
-apt-get -y install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev
+apt-get -y install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev libexpat-dev
 # Note: osmosis is removed from this next line (compared to wiki page) as it is installed directly
 apt-get -y install gcc proj-bin libgeos-c1 libgeos++-dev
 apt-get -y install php5 php-pear php5-pgsql php5-json php-db
