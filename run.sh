@@ -125,7 +125,7 @@ fi
 # Ensure the system locale is UTF-8, to avoid Postgres install failure
 echo "LANG=${utf8Language}.UTF-8" > /etc/default/locale
 echo "LC_ALL=${utf8Language}.UTF-8" >> /etc/default/locale
-sudo locale-gen ${utf8Language} ${utf8Language}.UTF-8
+locale-gen ${utf8Language} ${utf8Language}.UTF-8
 dpkg-reconfigure locales
 
 # Ensure there is a nominatim user account
@@ -191,7 +191,8 @@ fi
 echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
-sudo apt-get install -y munin
+# Install Munin monitoring
+apt-get -y install munin
 
 # Nominatim munin
 # !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
@@ -351,8 +352,8 @@ sudo -u ${username} rm -f specialphrases.sql
 echo "#	$(date)	Done special phrases"
 
 # Set up the website for use with Apache
-sudo mkdir -pm 755 ${wwwNominatim}
-sudo chown ${username} ${wwwNominatim}
+mkdir -pm 755 ${wwwNominatim}
+chown ${username} ${wwwNominatim}
 sudo -u ${username} ./utils/setup.php --create-website ${wwwNominatim}
 
 # Write out a robots file to keep search engines out
