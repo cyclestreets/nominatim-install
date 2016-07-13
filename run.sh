@@ -191,6 +191,8 @@ fi
 echo "#	$(date)	Restarting PostgreSQL"
 service postgresql restart
 
+sudo apt-get install -y munin
+
 # Nominatim munin
 # !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
 ln -s '/home/nominatim/Nominatim/munin/nominatim_importlag' '/etc/munin/plugins/nominatim_importlag'
