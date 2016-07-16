@@ -90,7 +90,7 @@ if [ ! -L "${osmosisBinary}" ]; then
     apt-get update > /dev/null
 
     # Osmosis requires java
-    apt-get -y install openjdk-7-jre
+    apt-get -y install wget openjdk-7-jre
 
     # Create folder
     mkdir -p /usr/local/osmosis
@@ -174,6 +174,11 @@ apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 # Additional packages
 # bc is needed in configPostgresql.sh
 apt-get -y install bc apache2 git autoconf-archive
+# needed by osm2pgsql, see https://github.com/openstreetmap/osm2pgsql/blob/master/README.md
+apt-get -y install autoconf automake libtool make g++ pkg-config libboost-dev \
+  libboost-system-dev libboost-filesystem-dev libboost-thread-dev libexpat1-dev \
+  libgeos-dev libgeos++-dev libpq-dev libbz2-dev libproj-dev zlib1g-dev \
+  lua5.2 liblua5.2-dev
 
 # Install gdal, needed for US Tiger house number data
 # !! More steps need to be added to this script to support that US data
@@ -196,6 +201,8 @@ apt-get -y install munin munin-node
 
 # Nominatim munin
 # !! Look at the comments at the top of the nominatim_importlag file in the following and copy the setup section to a new file in: /etc/munin/plugin-conf.d/
+# skip if doing a Docker install as munin is not installed via run.sh
+if [ -z "${dockerInstall}" ]; then
 ln -s '/home/nominatim/Nominatim/munin/nominatim_importlag' '/etc/munin/plugins/nominatim_importlag'
 ln -s '/home/nominatim/Nominatim/munin/nominatim_query_speed' '/etc/munin/plugins/nominatim_query_speed'
 ln -s '/home/nominatim/Nominatim/munin/nominatim_nominatim_requests' '/etc/munin/plugins/nominatim_nominatim_requests'
@@ -205,6 +212,7 @@ ln -s '/home/nominatim/Nominatim/munin/nominatim_nominatim_requests' '/etc/munin
 apt-get -y install libdbd-pg-perl
 munin-node-configure --shell | grep postgres | sh
 service munin-reload restart
+fi
 
 
 # We will use the Nominatim user's homedir for the installation, so switch to that
